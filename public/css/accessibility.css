@@ -1,0 +1,110 @@
+/* Core adaptive UI helpers for AbleLink (F5 - Rifat Jahan Roza)
+ *
+ * These classes are applied at the <body> level by Blade layouts,
+ * based on the authenticated user's accessibility_preferences.
+ */
+
+html.access-font-small,
+body.access-font-small {
+    font-size: 14px !important;
+}
+
+html.access-font-normal,
+body.access-font-normal {
+    font-size: 16px !important;
+}
+
+html.access-font-large,
+body.access-font-large {
+    font-size: 18px !important;
+}
+
+html.access-font-xlarge,
+body.access-font-xlarge {
+    font-size: 20px !important;
+}
+
+body.access-spacing-compact * {
+    line-height: 1.2;
+}
+
+body.access-spacing-relaxed * {
+    line-height: 1.7;
+}
+
+body.access-contrast-high {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.access-contrast-high a,
+body.access-contrast-high a span,
+body.access-contrast-high .text-slate-900,
+body.access-contrast-high .text-slate-800,
+body.access-contrast-high .text-slate-700,
+body.access-contrast-high .text-slate-600,
+body.access-contrast-high .text-blue-600,
+body.access-contrast-high .text-purple-600 {
+    color: #ffff00 !important;
+}
+
+body.access-contrast-high .card,
+body.access-contrast-high .bg-white,
+body.access-contrast-high .bg-slate-50,
+body.access-contrast-high .bg-gray-50,
+body.access-contrast-high .border-slate-100,
+body.access-contrast-high .border-slate-200 {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+body.access-contrast-high .btn,
+body.access-contrast-high button,
+body.access-contrast-high .rounded-full {
+    border-color: #ffffff !important;
+}
+
+body.access-contrast-inverted {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.access-reduce-motion,
+body.access-reduce-motion * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+body.access-screen-reader a:focus,
+body.access-screen-reader button:focus,
+body.access-screen-reader input:focus,
+body.access-screen-reader select:focus,
+body.access-screen-reader textarea:focus {
+    outline: 3px solid #ffff00 !important;
+    outline-offset: 3px;
+}
+
+.skip-to-content {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    padding: 0.75rem 1.25rem;
+    background-color: #000000;
+    color: #ffffff;
+    z-index: 9999;
+    border-radius: 0.5rem;
+}
+
+.skip-to-content:focus {
+    top: 1rem;
+    outline: 3px solid #ffff00;
+}
+
+body.access-cb-protanopia a {
+    text-decoration: underline wavy #ffffff;
+}
+
+body.access-cb-deuteranopia a {
+    border-bottom: 2px dashed #ffffff;
+}

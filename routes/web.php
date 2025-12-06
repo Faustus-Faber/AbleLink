@@ -2,9 +2,7 @@
 
 
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\OtpController;
-use App\Http\Controllers\Auth\RegistrationController;
+use App\Http\Controllers\User\DashboardController; 
 use Illuminate\Support\Facades\Route;
 
 
@@ -21,8 +19,11 @@ Route::post('/otp/resend', [OtpController::class, 'resend'])->name('otp.resend')
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    
+    //F2 - Role Based Dashboards (Roza Akter)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
-
+    
 Route::get('/banned', function () {
     return view('errors.banned');
 })->name('banned');
