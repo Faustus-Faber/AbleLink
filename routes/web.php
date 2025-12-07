@@ -32,6 +32,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/accessibility/edit', [App\Http\Controllers\Profile\AccessibilityController::class, 'edit'])->name('accessibility.edit');
     Route::put('/accessibility', [App\Http\Controllers\Profile\AccessibilityController::class, 'update'])->name('accessibility.update');
     Route::post('/accessibility/apply', [App\Http\Controllers\Profile\AccessibilityController::class, 'apply'])->name('accessibility.apply');
+
+    //F4 - Farhan Zarif
+    Route::middleware(['verified', 'role:caregiver'])->prefix('caregiver')->name('caregiver.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'index'])->name('dashboard');
+        Route::post('/request', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'sendRequest'])->name('request');
+        Route::post('/sos/{event}/resolve', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'resolveSos'])->name('sos.resolve');
+        Route::get('/patient/{user}/edit', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'editPatient'])->name('patient.edit');
+        Route::put('/patient/{user}', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'updatePatient'])->name('patient.update');
+        Route::delete('/patient/{user}', [\App\Http\Controllers\Caregiver\CaregiverController::class, 'unlink'])->name('patient.unlink');
+    });
+
+    Route::middleware(['verified'])->group(function () {
+         Route::get('/requests', [\App\Http\Controllers\Caregiver\ConnectionController::class, 'index'])->name('requests.index');
+         Route::post('/requests/{user}/approve', [\App\Http\Controllers\Caregiver\ConnectionController::class, 'approve'])->name('requests.approve');
+         Route::post('/requests/{user}/reject', [\App\Http\Controllers\Caregiver\ConnectionController::class, 'reject'])->name('requests.reject');
+    });
 });
     
 Route::get('/banned', function () {

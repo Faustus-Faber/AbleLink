@@ -84,4 +84,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserProfile::class);
     }
+
+    //F4 - Farhan Zarif
+    public function patients()
+    {
+        return $this->belongsToMany(User::class, 'caregiver_user', 'caregiver_id', 'user_id')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
+
+    public function caregivers()
+    {
+        return $this->belongsToMany(User::class, 'caregiver_user', 'user_id', 'caregiver_id')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
 }

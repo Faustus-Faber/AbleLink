@@ -74,6 +74,14 @@
                            class="px-5 py-2.5 rounded-full font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all">
                            Dashboard
                         </a>
+                        @if(Auth::user()->hasRole('caregiver'))
+                            <a href="{{ route('caregiver.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                                Caregiver Dashboard
+                            </a>
+                        @endif
+                        <a href="{{ route('requests.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                            Requests
+                        </a>
 
                         <!-- Profile Link -->
                         <div class="ml-3 relative" x-data="{ open: false }">
