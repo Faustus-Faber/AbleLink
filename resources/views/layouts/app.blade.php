@@ -13,6 +13,7 @@
     <script>
         window.ableLinkUserRole = @json(auth()->check() ? auth()->user()->role : 'guest');
     </script>
+    <link rel="stylesheet" href="{{ asset('css/accessibility.css') }}">
     @vite(['resources/js/app.js'])
 
 
@@ -89,9 +90,11 @@
                                  style="display: none;">
                                 
                                 <div class="px-4 py-3 border-b border-zinc-100 bg-zinc-50 rounded-t-xl mb-1">
-                                    <p class="text-sm font-bold text-zinc-900 truncate">{{ Auth::user()->name }}</p>
                                     <p class="text-xs text-zinc-500 truncate">{{ Auth::user()->email }}</p>
                                 </div>
+
+                                <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900">Your Profile</a>
+                                <a href="{{ route('accessibility.edit') }}" class="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 border-b border-zinc-100 mb-1">Accessibility</a>
 
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf

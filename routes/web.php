@@ -22,6 +22,16 @@ Route::middleware('auth')->group(function () {
     
     //F2 - Role Based Dashboards (Roza Akter)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    //F3 - Evan Yuvraj Munshi
+    Route::get('/profile', [App\Http\Controllers\Profile\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [App\Http\Controllers\Profile\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\Profile\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/avatar', [App\Http\Controllers\Profile\ProfileController::class, 'uploadAvatar'])->name('profile.upload_avatar');
+
+    Route::get('/accessibility/edit', [App\Http\Controllers\Profile\AccessibilityController::class, 'edit'])->name('accessibility.edit');
+    Route::put('/accessibility', [App\Http\Controllers\Profile\AccessibilityController::class, 'update'])->name('accessibility.update');
+    Route::post('/accessibility/apply', [App\Http\Controllers\Profile\AccessibilityController::class, 'apply'])->name('accessibility.apply');
 });
     
 Route::get('/banned', function () {

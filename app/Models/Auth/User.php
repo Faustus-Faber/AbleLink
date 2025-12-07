@@ -78,4 +78,10 @@ class User extends Authenticatable
     {
         return (bool) $this->otp_verified_at;
     }
+
+    //F3 - Evan Yuvraj Munshi
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
 }
