@@ -6,12 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // Added role
+        'role',
+        'disability_type',
+        'accessibility_settings',
+        'primary_caregiver_id',
     ];
 
     /**
@@ -45,31 +47,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'accessibility_settings' => 'array',
+            'otp_expires_at' => 'datetime',
+            'otp_verified_at' => 'datetime',
         ];
     }
 
-    public function profile()
+    /**
+     * Primary caregiver relationship (a caregiver is also a user).
+     */
+    public function primaryCaregiver()
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->belongsTo(self::class, 'primary_caregiver_id');
     }
 
-    public function patients()
+    /**
+     * People this user is a caregiver for.
+     */
+    public function careRecipients()
     {
-        return $this->belongsToMany(User::class, 'caregiver_user', 'caregiver_id', 'user_id')
-                    ->withPivot('status')
-                    ->withTimestamps();
-    }
-
-    public function caregivers()
-    {
-        return $this->belongsToMany(User::class, 'caregiver_user', 'user_id', 'caregiver_id')
-                    ->withPivot('status')
-                    ->withTimestamps();
-    }
-    
-    // Check role helper
-    public function hasRole($role) 
-    {
-        return $this->role === $role;
+        return $this->hasMany(self::class, 'primary_caregiver_id');
     }
 }
