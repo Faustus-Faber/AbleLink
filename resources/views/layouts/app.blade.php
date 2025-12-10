@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 @php
     $bodyClassString = '';
+    
+    // F5 - Adaptive UI Class Generation
+    if (isset($accessibilityPreferences) && is_array($accessibilityPreferences)) {
+        if (isset($accessibilityPreferences['font_size']) && $accessibilityPreferences['font_size'] !== 'normal') {
+            $bodyClassString .= ' access-font-' . $accessibilityPreferences['font_size'];
+        }
+        
+        if (isset($accessibilityPreferences['spacing']) && $accessibilityPreferences['spacing'] !== 'normal') {
+            $bodyClassString .= ' access-spacing-' . $accessibilityPreferences['spacing'];
+        }
+        
+        if (isset($accessibilityPreferences['contrast_mode']) && $accessibilityPreferences['contrast_mode'] !== 'normal') {
+            $bodyClassString .= ' access-contrast-' . $accessibilityPreferences['contrast_mode'];
+        }
+        
+        if (!empty($accessibilityPreferences['color_blind_mode']) && $accessibilityPreferences['color_blind_mode'] !== 'none') {
+            $bodyClassString .= ' access-cb-' . $accessibilityPreferences['color_blind_mode'];
+        }
+        
+        if (!empty($accessibilityPreferences['reduce_motion'])) {
+            $bodyClassString .= ' access-reduce-motion';
+        }
+        
+        if (!empty($accessibilityPreferences['screen_reader_enabled'])) {
+            $bodyClassString .= ' access-screen-reader';
+        }
+    }
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $bodyClassString }}">
 <head>
@@ -12,8 +39,20 @@
 
     <script>
         window.ableLinkUserRole = @json(auth()->check() ? auth()->user()->role : 'guest');
+        
+        // F5 - Shared Preferences for JS
+        window.ableLinkPrefs = @json($accessibilityPreferences ?? []);
+
+        // F5 - Text-to-Speech Helper
+        function speak(text) {
+            if (window.ableLinkPrefs && window.ableLinkPrefs.text_to_speech_enabled) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+        }
     </script>
-    <link rel="stylesheet" href="{{ asset('css/accessibility.css') }}">
     @vite(['resources/js/app.js'])
 
 
