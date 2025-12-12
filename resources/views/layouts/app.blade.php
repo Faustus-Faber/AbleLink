@@ -42,6 +42,9 @@
         
         // F5 - Shared Preferences for JS
         window.ableLinkPrefs = @json($accessibilityPreferences ?? []);
+        
+        // F6 - Context for Voice Interaction
+        window.ableLinkIsDisabled = @json(auth()->check() && auth()->user()->hasRole('disabled'));
 
         // F5 - Text-to-Speech Helper
         function speak(text) {
