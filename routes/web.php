@@ -48,6 +48,9 @@ Route::middleware('auth')->group(function () {
          Route::post('/requests/{user}/approve', [\App\Http\Controllers\Caregiver\ConnectionController::class, 'approve'])->name('requests.approve');
          Route::post('/requests/{user}/reject', [\App\Http\Controllers\Caregiver\ConnectionController::class, 'reject'])->name('requests.reject');
     });
+
+    // F7 - AI Chat - Farhan Zarif
+    Route::post('/ai/chat', [\App\Http\Controllers\Ai\AiNavigationController::class, 'chat'])->name('ai.chat');
 });
     
 Route::get('/banned', function () {
