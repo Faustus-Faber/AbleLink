@@ -144,6 +144,7 @@
                                 </div>
 
                                 <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900">Your Profile</a>
+                                <a href="{{ route('documents.upload') }}" class="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900">OCR & Simplifier</a>
                                 <a href="{{ route('accessibility.edit') }}" class="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 border-b border-zinc-100 mb-1">Accessibility</a>
 
                                 <form action="{{ route('logout') }}" method="POST">

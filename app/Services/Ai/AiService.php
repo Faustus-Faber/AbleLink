@@ -134,32 +134,6 @@ class AiService
                         'required' => ['url']
                     ]
                 ]
-            ],
-            [
-                'type' => 'function',
-                'function' => [
-                    'name' => 'navigate',
-                    'description' => 'Navigate to a specific URL based on user intent.',
-                    'parameters' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'url' => ['type' => 'string', 'description' => 'The full absolute URL to navigate to.']
-                        ],
-                        'required' => ['url']
-                    ]
-                ]
-            ],
-            [
-                'type' => 'function',
-                'function' => [
-                    'name' => 'fill_input',
-                    'description' => 'Fill a text input field, textarea, or select box.',
-                    'parameters' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'selector' => ['type' => 'string', 'description' => 'The ID selector (e.g. #email) to fill.'],
-                            'value' => ['type' => 'string', 'description' => 'The value to type.'],
-                            'feedback_question' => ['type' => 'string', 'description' => 'Verbal response to speak to the user. REQUIRED for assisted form filling to ask the next question.']
             ]
         ];
 

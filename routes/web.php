@@ -51,6 +51,11 @@ Route::middleware('auth')->group(function () {
 
     // F7 - AI Chat - Farhan Zarif
     Route::post('/ai/chat', [\App\Http\Controllers\Ai\AiNavigationController::class, 'chat'])->name('ai.chat');
+
+    // F8 - Document Simplification & OCR - Tarannum Al Akida
+    Route::get('/documents/upload', [\App\Http\Controllers\Document\DocumentController::class, 'showUploadForm'])->name('documents.upload');
+    Route::post('/documents/process', [\App\Http\Controllers\Document\DocumentController::class, 'processDocument'])->name('documents.process');
+    Route::post('/documents/simplify-text', [\App\Http\Controllers\Document\DocumentController::class, 'simplifyText'])->name('documents.simplify-text');
 });
     
 Route::get('/banned', function () {
