@@ -56,6 +56,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/upload', [\App\Http\Controllers\Document\DocumentController::class, 'showUploadForm'])->name('documents.upload');
     Route::post('/documents/process', [\App\Http\Controllers\Document\DocumentController::class, 'processDocument'])->name('documents.process');
     Route::post('/documents/simplify-text', [\App\Http\Controllers\Document\DocumentController::class, 'simplifyText'])->name('documents.simplify-text');
+
+    // F10 - Employer Dashboard - Roza Akter
+    Route::middleware(['role:employer'])->prefix('employer')->name('employer.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Employer\EmployerJobController::class, 'index'])->name('dashboard');
+        Route::resource('jobs', \App\Http\Controllers\Employer\EmployerJobController::class);
+        Route::resource('applications', \App\Http\Controllers\Employer\EmployerJobController::class)->only(['index', 'update']); // Handling application status via JobController for now or separate? Checking logic. 
+        // Based on typical Laravel, applications might be handled in a dedicated controller or nested. 
+        // Let's stick to the controller list: EmployerJobController seems to handle listing. 
+        // Check if there is an ApplicationController? No, only JobApplication model.
+        // Wait, "EmployerJobController@updateApplicationStatus". 
+        Route::patch('/applications/{application}/status', [\App\Http\Controllers\Employer\EmployerJobController::class, 'updateApplicationStatus'])->name('applications.update-status');
+        
+        Route::resource('profile', \App\Http\Controllers\Employer\EmployerProfileController::class)->only(['show', 'edit', 'update']);
+        Route::resource('interviews', \App\Http\Controllers\Employer\InterviewController::class);
+        Route::get('/reports', [\App\Http\Controllers\Employer\ReportController::class, 'index'])->name('reports.index');
+    });
 });
     
 Route::get('/banned', function () {
