@@ -72,6 +72,19 @@ Route::middleware('auth')->group(function () {
         Route::resource('interviews', \App\Http\Controllers\Employer\InterviewController::class);
         Route::get('/reports', [\App\Http\Controllers\Employer\ReportController::class, 'index'])->name('reports.index');
     });
+
+    // F9 - Accessible Job Search & Applications - Evan Yuvraj Munshi
+    Route::get('/jobs', [\App\Http\Controllers\Job\JobController::class, 'index'])->name('jobs.index');
+    Route::get('/jobs/{job}', [\App\Http\Controllers\Job\JobController::class, 'show'])->name('jobs.show');
+    Route::post('/jobs/{job}/apply', [\App\Http\Controllers\Job\JobController::class, 'apply'])->name('jobs.apply');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/candidate/applications', [\App\Http\Controllers\Candidate\CandidateApplicationController::class, 'index'])->name('candidate.applications.index');
+        
+        Route::get('/notifications', [\App\Http\Controllers\Notification\NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/{id}/read', [\App\Http\Controllers\Notification\NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\Notification\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    });
 });
     
 Route::get('/banned', function () {
