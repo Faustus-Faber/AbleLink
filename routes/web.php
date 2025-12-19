@@ -85,6 +85,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/notifications/{id}/read', [\App\Http\Controllers\Notification\NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [\App\Http\Controllers\Notification\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
     });
+
+    // F11 - Accessible Course Library - Tarannum Al Akida
+    Route::middleware(['auth'])->group(function () {
+        // Public Library
+        Route::get('/courses', [\App\Http\Controllers\Course\CourseLibraryController::class, 'index'])->name('courses.index');
+        Route::get('/courses/{course}', [\App\Http\Controllers\Course\CourseLibraryController::class, 'show'])->name('courses.show');
+
+        // Admin Management
+        Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+            Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
+            Route::resource('courses.media', \App\Http\Controllers\Admin\CourseMediaController::class)->shallow();
+        });
+    });
 });
     
 Route::get('/banned', function () {
