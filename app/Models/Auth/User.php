@@ -35,6 +35,9 @@ class User extends Authenticatable
         'otp_verified_at',
         'last_login_at',
         'banned_at',
+        // F12 - Farhan Zarif
+        'skills',
+        'interests',
     ];
 
     protected $hidden = [
@@ -50,6 +53,9 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'banned_at' => 'datetime',
             'password' => 'hashed',
+            // F12 - Farhan Zarif
+            'skills' => 'array',
+            'interests' => 'array',
         ];
     }
 

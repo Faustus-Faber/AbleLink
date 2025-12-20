@@ -182,6 +182,17 @@
                     </button>
                 </div>
             </form>
+            
+            <!-- F12 - Smart Recommendations Trigger -->
+            <div class="mt-4 flex justify-end">
+                <button @click="$dispatch('open-recommendation-modal', { type: 'jobs' })" 
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Smart Recommendations</span>
+                </button>
+            </div>
         </div>
 
         {{-- Job Listings --}}

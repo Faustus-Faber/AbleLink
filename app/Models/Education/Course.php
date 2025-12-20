@@ -21,6 +21,9 @@ class Course extends Model
         'level',
         'estimated_minutes',
         'published_at',
+        // F12 - Farhan Zarif
+        'category',
+        'tags',
     ];
 
     protected function casts(): array
@@ -28,6 +31,7 @@ class Course extends Model
         return [
             'published_at' => 'datetime',
             'estimated_minutes' => 'integer',
+            'tags' => 'array',
         ];
     }
 

@@ -34,6 +34,9 @@ class Job extends Model
         'accessibility_accommodations',
         'additional_requirements',
         'status',
+        // F12 - Farhan Zarif
+        'skills_required',
+        'embedding_vector',
     ];
 
     protected $casts = [
@@ -44,6 +47,9 @@ class Job extends Model
         'flexible_hours' => 'boolean',
         'remote_work_available' => 'boolean',
         'salary_max' => 'decimal:2',
+        // F12 - Farhan Zarif
+        'skills_required' => 'array',
+        'embedding_vector' => 'array',
     ];
 
     public function employer()

@@ -98,6 +98,15 @@ Route::middleware('auth')->group(function () {
             Route::resource('courses.media', \App\Http\Controllers\Admin\CourseMediaController::class)->shallow();
         });
     });
+
+    // F12 - AI Recommendations & Certification - Faustus-Faber
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/recommendations/jobs', [\App\Http\Controllers\Recommendation\RecommendationController::class, 'getJobs'])->name('recommendations.jobs');
+        Route::get('/recommendations/courses', [\App\Http\Controllers\Recommendation\RecommendationController::class, 'getCourses'])->name('recommendations.courses');
+        
+        Route::post('/courses/{course}/certificate', [\App\Http\Controllers\Education\CertificateController::class, 'generate'])->name('courses.certificate.generate');
+        Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Education\CertificateController::class, 'download'])->name('certificates.download');
+    });
 });
     
 Route::get('/banned', function () {

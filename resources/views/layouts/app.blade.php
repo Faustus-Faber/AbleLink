@@ -110,6 +110,7 @@
             </a>
             
             <nav class="hidden md:flex items-center space-x-2">
+
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}" 
@@ -190,6 +191,11 @@
         </main>
 
     @include('partials.footer')
+
+    @include('partials.footer')
+    
+    <!-- F12 - Recommendation Modal -->
+    <x-recommendation-modal />
 
     <!-- F7 - AI Chat Widget -->
     @auth
