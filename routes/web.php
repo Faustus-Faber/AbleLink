@@ -107,6 +107,26 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/certificate', [\App\Http\Controllers\Education\CertificateController::class, 'generate'])->name('courses.certificate.generate');
         Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Education\CertificateController::class, 'download'])->name('certificates.download');
     });
+
+    // F13 - Community Forum & Messaging - Faustus-Faber
+    Route::middleware(['auth', \App\Http\Middleware\CheckBanned::class])->group(function () {
+        // Community Forum
+        Route::resource('forum', \App\Http\Controllers\Community\ForumController::class);
+        Route::post('/forum/{thread}/reply', [\App\Http\Controllers\Community\ForumController::class, 'reply'])->name('forum.reply');
+        Route::post('/forum/{type}/{id}/flag', [\App\Http\Controllers\Community\ForumController::class, 'flag'])->name('forum.flag');
+
+        // Private Messaging
+        Route::resource('messages', \App\Http\Controllers\Community\MessageController::class);
+        Route::post('/messages/conversation', [\App\Http\Controllers\Community\MessageController::class, 'startConversation'])->name('messages.start');
+        
+        // Admin Moderation
+        Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+             Route::get('/moderation', [\App\Http\Controllers\Admin\AdminModerationController::class, 'index'])->name('moderation.index');
+             Route::post('/moderation/{type}/{id}/{action}', [\App\Http\Controllers\Admin\AdminModerationController::class, 'handleAction'])->name('moderation.action');
+             Route::post('/users/{user}/ban', [\App\Http\Controllers\Admin\AdminModerationController::class, 'banUser'])->name('users.ban');
+             Route::post('/users/{user}/unban', [\App\Http\Controllers\Admin\AdminModerationController::class, 'unbanUser'])->name('users.unban');
+        });
+    });
 });
     
 Route::get('/banned', function () {
