@@ -126,6 +126,17 @@ Route::middleware('auth')->group(function () {
              Route::post('/users/{user}/ban', [\App\Http\Controllers\Admin\AdminModerationController::class, 'banUser'])->name('users.ban');
              Route::post('/users/{user}/unban', [\App\Http\Controllers\Admin\AdminModerationController::class, 'unbanUser'])->name('users.unban');
         });
+
+        // F14 - Volunteer Matching - Roza Akter
+        Route::middleware(['role:volunteer'])->group(function () {
+            Route::resource('volunteer/profile', \App\Http\Controllers\Volunteer\VolunteerProfileController::class);
+            Route::get('/volunteer/requests', [\App\Http\Controllers\Volunteer\AssistanceRequestController::class, 'index'])->name('volunteer.requests.index');
+            Route::post('/volunteer/requests/{request}/accept', [\App\Http\Controllers\Volunteer\AssistanceRequestController::class, 'accept'])->name('volunteer.requests.accept');
+        });
+
+        Route::middleware(['role:disabled'])->group(function () {
+             Route::resource('user/assistance', \App\Http\Controllers\User\UserAssistanceController::class);
+        });
     });
 });
     
