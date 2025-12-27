@@ -143,7 +143,20 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::post('/sos', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'store'])->name('sos.store');
         Route::get('/sos/{event}', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'show'])->name('sos.show');
+        Route::get('/sos/{event}', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'show'])->name('sos.show');
         Route::post('/sos/{event}/resolve', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'resolve'])->name('sos.resolve');
+    });
+
+    // F16 - Community Hub & Matrimony - Evan Yuvraj Munshi
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/community', [\App\Http\Controllers\Community\CommunityController::class, 'index'])->name('community.index');
+        
+        // Matrimony
+        Route::resource('community/matrimony', \App\Http\Controllers\Community\MatrimonyController::class);
+        
+        // Events
+        Route::resource('community/events', \App\Http\Controllers\Community\CommunityEventController::class);
+        Route::post('/community/events/{event}/join', [\App\Http\Controllers\Community\CommunityEventController::class, 'join'])->name('community.events.join');
     });
 });
     
