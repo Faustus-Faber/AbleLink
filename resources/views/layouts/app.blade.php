@@ -197,6 +197,31 @@
     <!-- F12 - Recommendation Modal -->
     <x-recommendation-modal />
 
+    <!-- F15 - Emergency SOS Trigger -->
+    @auth
+        <div class="fixed bottom-6 left-6 z-50">
+            <form action="{{ route('sos.store') }}" method="POST" onsubmit="return confirm('Are you sure you want to trigger an SOS alert? This will start a live audio recording and notify your emergency contacts.');">
+                @csrf
+                <input type="hidden" name="latitude" id="sos_latitude">
+                <input type="hidden" name="longitude" id="sos_longitude">
+                <button type="submit" class="w-16 h-16 bg-red-600 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-red-700 hover:scale-110 transition-all duration-300 animate-pulse border-4 border-white/30">
+                    <span class="sr-only">Emergency SOS</span>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </button>
+            </form>
+            <script>
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        document.getElementById('sos_latitude').value = position.coords.latitude;
+                        document.getElementById('sos_longitude').value = position.coords.longitude;
+                    });
+                }
+            </script>
+        </div>
+    @endauth
+
     <!-- F7 - AI Chat Widget -->
     @auth
     <div x-data="aiChatWidget()" x-init="init()" class="fixed bottom-6 right-6 z-50 font-sans">

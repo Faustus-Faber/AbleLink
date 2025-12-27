@@ -138,6 +138,13 @@ Route::middleware('auth')->group(function () {
              Route::resource('user/assistance', \App\Http\Controllers\User\UserAssistanceController::class);
         });
     });
+
+    // F15 - Emergency SOS - Tarannum Al Akida
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/sos', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'store'])->name('sos.store');
+        Route::get('/sos/{event}', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'show'])->name('sos.show');
+        Route::post('/sos/{event}/resolve', [\App\Http\Controllers\Emergency\EmergencySosController::class, 'resolve'])->name('sos.resolve');
+    });
 });
     
 Route::get('/banned', function () {
