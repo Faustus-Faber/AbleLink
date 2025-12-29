@@ -158,6 +158,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('community/events', \App\Http\Controllers\Community\CommunityEventController::class);
         Route::post('/community/events/{event}/join', [\App\Http\Controllers\Community\CommunityEventController::class, 'join'])->name('community.events.join');
     });
+
+    // F17 - Doctor Appointments - Roza Akter
+    Route::middleware(['auth'])->group(function () {
+        // User View
+        Route::get('/appointments', [\App\Http\Controllers\User\AppointmentController::class, 'index'])->name('appointments.index');
+
+        // Caregiver Management
+        Route::middleware(['role:caregiver'])->prefix('caregiver')->name('caregiver.')->group(function () {
+            Route::resource('appointments', \App\Http\Controllers\Caregiver\DoctorAppointmentController::class);
+        });
+    });
 });
     
 Route::get('/banned', function () {
