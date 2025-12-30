@@ -169,11 +169,19 @@ Route::middleware('auth')->group(function () {
             Route::resource('appointments', \App\Http\Controllers\Caregiver\DoctorAppointmentController::class);
         });
     });
+
+    // F18 - AI Agent - Farhan Zarif
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/ai/chat', [\App\Http\Controllers\Ai\AiNavigationController::class, 'chat'])->name('ai.chat');
+        Route::post('/ai/upload', [\App\Http\Controllers\Ai\AiNavigationController::class, 'upload'])->name('ai.upload');
+    });
 });
     
 Route::get('/banned', function () {
     return view('errors.banned');
 })->name('banned');
+
+require __DIR__.'/auth.php';
 
 Route::get('/', function () {
     return view('welcome');
