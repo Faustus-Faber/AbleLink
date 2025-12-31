@@ -175,6 +175,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/ai/chat', [\App\Http\Controllers\Ai\AiNavigationController::class, 'chat'])->name('ai.chat');
         Route::post('/ai/upload', [\App\Http\Controllers\Ai\AiNavigationController::class, 'upload'])->name('ai.upload');
     });
+
+    // F19 - Caregiver Health Management - Evan Yuvraj Munshi
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/health/dashboard', [\App\Http\Controllers\Health\HealthDashboardController::class, 'index'])->name('health.dashboard');
+        
+        // Medication Management
+        Route::resource('health/medications', \App\Http\Controllers\Health\MedicationController::class);
+        Route::post('/health/medications/{medication}/log', [\App\Http\Controllers\Health\MedicationController::class, 'log'])->name('health.medications.log');
+        
+        // Health Goals
+        Route::resource('health/goals', \App\Http\Controllers\Health\HealthGoalController::class);
+        
+        // Health Metrics
+        Route::resource('health/metrics', \App\Http\Controllers\Health\HealthMetricController::class);
+    });
 });
     
 Route::get('/banned', function () {

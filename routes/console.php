@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 
 // F17 - Doctor Appointment Reminders - Roza Akter
 \Illuminate\Support\Facades\Schedule::command('appointments:check-reminders')->everyMinute();
+
+// F19 - Missed Medication Check - Evan Yuvraj Munshi
+\Illuminate\Support\Facades\Schedule::command('health:check-missed')->hourly();
