@@ -254,7 +254,7 @@
             </div>
         </section>
 
-        <!-- Banned Users Management Section (F23 Fix) -->
+        <!-- Banned Users Management Section -->
         <section>
             <div class="flex items-center justify-between mb-6">
                  <h2 class="text-xl font-bold text-slate-900 flex items-center">

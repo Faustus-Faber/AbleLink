@@ -176,6 +176,42 @@ Route::middleware('auth')->group(function () {
         Route::post('/ai/upload', [\App\Http\Controllers\Ai\AiNavigationController::class, 'upload'])->name('ai.upload');
     });
 
+    // F20 - Admin Dashboard & PWA - Tarannum Al Akida
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Auth
+        Route::get('/login', [\App\Http\Controllers\Admin\AdminController::class, 'showLogin'])->name('login');
+        Route::post('/login', [\App\Http\Controllers\Admin\AdminController::class, 'login'])->name('login.submit');
+        Route::post('/logout', [\App\Http\Controllers\Admin\AdminController::class, 'logout'])->name('logout');
+
+        // Dashboard (Protected)
+        Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
+            
+            // Stats & User Management
+            Route::get('/users', [\App\Http\Controllers\Admin\AdminStatsController::class, 'users'])->name('users.list');
+            Route::get('/volunteers', [\App\Http\Controllers\Admin\AdminStatsController::class, 'volunteers'])->name('volunteers.list');
+            Route::get('/employers', [\App\Http\Controllers\Admin\AdminStatsController::class, 'employers'])->name('employers.list');
+            Route::get('/caregivers', [\App\Http\Controllers\Admin\AdminStatsController::class, 'caregivers'])->name('caregivers.list');
+            
+            Route::get('/users/create/{role?}', [\App\Http\Controllers\Admin\AdminStatsController::class, 'create'])->name('users.create');
+            Route::post('/users', [\App\Http\Controllers\Admin\AdminStatsController::class, 'store'])->name('users.store');
+            Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminStatsController::class, 'destroy'])->name('users.destroy');
+            
+            // Community Moderation
+            Route::resource('community', \App\Http\Controllers\Admin\AdminCommunityController::class);
+            
+            // Job Management
+            Route::resource('jobs', \App\Http\Controllers\Admin\AdminJobController::class);
+            
+            // Aid Programs
+            Route::resource('aid-programs', \App\Http\Controllers\Admin\AdminAidProgramController::class);
+        });
+    });
+
+    // Public Aid Directory
+    Route::get('/aid', [\App\Http\Controllers\Aid\AidDirectoryController::class, 'index'])->name('aid.index');
+    Route::get('/aid/{program}', [\App\Http\Controllers\Aid\AidDirectoryController::class, 'show'])->name('aid.show');
+
     // F19 - Caregiver Health Management - Evan Yuvraj Munshi
     Route::middleware(['auth'])->group(function () {
         Route::get('/health/dashboard', [\App\Http\Controllers\Health\HealthDashboardController::class, 'index'])->name('health.dashboard');
