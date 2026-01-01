@@ -21,12 +21,18 @@ class UserProfile extends Model
         'date_of_birth',
         'emergency_contact_name',
         'emergency_contact_phone',
-        'emergency_contact_phone',
+        // F12 - Farhan Zarif
+        'skills',
+        'interests',
+        'learning_style',
     ];
     
     protected $casts = [
         'accessibility_preferences' => 'array',
         'date_of_birth' => 'date',
+        // F12 - Farhan Zarif
+        'skills' => 'array',
+        'interests' => 'array',
     ];
 
     public function user()

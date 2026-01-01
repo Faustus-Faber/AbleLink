@@ -1,59 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AbleLink Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This repository contains the implementation of the AbleLink platform, a comprehensive accessibility-focused web application.
 
-## About Laravel
+## 👥 Team Members & Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### **Tarannum Al Akida (23101441)**
+*   **F1: OTP Authentication** - Secure login system using email OTPs with role-based redirection (Admin, User, Caregiver, Employer, Volunteer).
+*   **F8: Content Simplification & OCR** - Image-to-text conversion and AI-powered text simplification for cognitive accessibility.
+*   **F11: Accessible Course Library** - Educational platform with video/media support for upskilling users.
+*   **F15: Emergency SOS System** - One-click emergency alert system that notifies caregivers and admins with location data.
+*   **F20: Admin Dashboard & PWA** - Centralized admin control, user management, aid directory, and Progressive Web App (PWA) support.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### **Roza Akter (23101446)**
+*   **F2: Role-Based Dashboards** - Dedicated, specialized dashboard layouts for every user role (Volunteer, Employer, Admin, User).
+*   **F5: Adaptive UI Framework** - System-wide high-contrast modes, font-scaling, and color-blindness accommodations.
+*   **F10: Employer Job Posting** - specialized dashboard for employers to post jobs, manage applications, and schedule interviews.
+*   **F14: Volunteer Matching** - System connecting volunteers with disabled users for real-world assistance tasks.
+*   **F17: Doctor Appointments** - Scheduler for medical appointments with reminders and calendar views.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### **Evan Yuvraj Munshi (23301312)**
+*   **F3: User Profile & Accessibility** - Comprehensive profile management with granular accessibility preference settings.
+*   **F6: Voice Interaction (TTS/STT)** - "Hover Reader" that speaks UI text on hover and voice command interface.
+*   **F9: Accessible Job Search** - Job board with specialized filters for accessibility requirements.
+*   **F16: Community Hub** - Event management system and Matrimony platform for social connection.
+*   **F19: Health & Medication** - Tracking tools for daily health metrics, medication schedules, and adherence logs.
 
-## Learning Laravel
+### **Farhan Zarif (23301692)**
+*   **F4: Caregiver Management** - Delegated access system allowing caregivers to manage patient profiles and settings.
+*   **F7: AI Navigation Assistant** - Chat-based AI that can navigate the site and answer context-aware questions.
+*   **F12: Recommendations & Certificates** - AI engine matching users to jobs/courses and generating PDF certificates.
+*   **F13: Moderator & Messaging** - Safe community forum and private messaging with automated AI toxicity detection.
+*   **F18: Autonomous AI Agent** - Advanced "Voice Copilot" that can perform actions (clicking, form filling) on behalf of the user.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 💻 How to Run on PC
 
-## Laravel Sponsors
+Follow these steps to set up the project locally.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1. Prerequisites
+Ensure you have the following installed:
+*   PHP 8.2+
+*   Composer
+*   Node.js & NPM
+*   MySQL
 
-### Premium Partners
+### 2. Initial Setup
+Clone the repository and install dependencies:
+```bash
+composer install
+npm install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Copy the environment file and generate the application key:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Contributing
+Configure your `.env` file with your database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ablelink
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Database Migration & Seeding
+To set up the database structure and populate it with sample data:
+```bash
+# Fresh migration with seeders (Recommended for first run)
+php artisan migrate:fresh --seed --class=ComprehensiveSeeder
+```
+*   **Migrating**: `php artisan migrate` runs pending migrations.
+*   **Seeding**: `php artisan db:seed` runs seeders to fill tables with test data.
 
-## Code of Conduct
+### 4. Storage Linking (Critical for Images)
+If images (avatars, course media) are not loading, you need to link the storage. 
+**If a storage link already exists, you must UNLINK it first.**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**How to Unlink & Relink:**
+```bash
+# Windows (Command Prompt)
+rmdir /s /q "public\storage"
+php artisan storage:link
 
-## Security Vulnerabilities
+# Windows (PowerShell)
+Remove-Item -Recurse -Force public/storage
+php artisan storage:link
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Linux / Mac
+rm -rf public/storage
+php artisan storage:link
+```
 
-## License
+### 5. Caching
+If you make changes to configurations or routes and they don't reflect, clear the cache:
+```bash
+# Clear all caches (Config, Route, Cache, View)
+php artisan optimize:clear
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Clear specific caches
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+### 6. Running the Server
+You need two terminals running simultaneously:
+
+**Terminal 1 (Backend):**
+```bash
+php artisan serve
+```
+
+**Terminal 2 (Frontend compilation):**
+```bash
+npm run dev
+```
+
+Visit `http://127.0.0.1:8000` in your browser.
+
+---
+
+## 📚 Documentation
+Check the `docs/` folder for:
+*   `FeatureMapping.md`: Detailed technical breakdown of every feature.
+*   `FileAuthorship.md`: Granular list of files created by each developer.

@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto py-8 px-4">
-    <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-900 mb-2">My Doctor Appointments</h1>
@@ -16,12 +15,10 @@
         </div>
     </div>
 
-    <!-- Calendar View -->
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8">
         <div id="calendar" class="p-6 fc-premium"></div>
     </div>
 
-    <!-- Appointments List -->
     <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
             <h2 class="text-xl font-bold text-slate-900">Appointment History</h2>
@@ -71,10 +68,8 @@
     </div>
 </div>
 
-<!-- FullCalendar CSS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet">
 <style>
-    /* Custom Scrollbar for patient list */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -90,7 +85,6 @@
         background: #94a3b8;
     }
 
-    /* Premium Calendar Overrides */
     .fc-premium {
         font-family: inherit;
          --fc-border-color: #e2e8f0;
@@ -108,7 +102,6 @@
          --fc-today-bg-color: #f8fafc;
     }
 
-    /* Toolbar & Buttons */
     .fc-premium .fc-toolbar-title {
         font-size: 1.5rem;
         font-weight: 800;
@@ -138,7 +131,6 @@
         color: var(--fc-button-active-text-color);
     }
     
-    /* Headers (Month, Week, Day) */
     .fc-premium .fc-col-header-cell-cushion {
         font-weight: 700;
         color: #334155;
@@ -155,7 +147,6 @@
         text-decoration: none;
     }
     
-    /* Events */
     .fc-premium .fc-event {
         border: none;
         border-radius: 6px;
@@ -166,7 +157,6 @@
         margin-bottom: 2px;
     }
 
-    /* TimeGrid (Week/Day) Specifics */
     .fc-premium .fc-timegrid-slot-label-cushion {
         font-weight: 600;
         color: #94a3b8;
@@ -182,7 +172,6 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
-    /* General Border Softening */
     .fc-theme-standard td, .fc-theme-standard th {
         border-color: #f1f5f9;
     }
@@ -192,13 +181,11 @@
         overflow: hidden;
     }
     
-    /* View Specific overrides to ensure consistency */
     .fc-view-harness {
         background-color: #fff;
     }
 </style>
 
-<!-- Appointment Details Modal -->
 <div id="appointment-details-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="details-modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeDetailsModal()"></div>
     <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
@@ -215,7 +202,6 @@
             <div class="p-8">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                        <!-- Doctor Icon -->
                         <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
@@ -227,7 +213,6 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Caregiver (Instead of Patient) -->
                     <div class="flex items-start">
                         <div class="flex-shrink-0 w-6 mt-0.5">
                             <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +265,6 @@
     </div>
 </div>
 
-<!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
 
 <script>
@@ -302,17 +286,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 day: 'Day'
             },
             navLinks: true, 
-            nowIndicator: false, // Changed to false per new requirement
+            nowIndicator: false, 
             dayMaxEvents: true,
             events: '{{ route("user.appointments.calendar") }}',
             eventDidMount: function(info) {
-                // Tooltip
                 info.el.title = info.event.title + ' (' + info.event.extendedProps.status + ')';
             },
             eventClick: function(info) {
                 info.jsEvent.preventDefault();
                 
-                // Populate Modal
                 const props = info.event.extendedProps;
                 document.getElementById('modal-doctor-name').textContent = info.event.title; 
                 document.getElementById('modal-caregiver-name').textContent = props.caregiver || 'Self/None';
@@ -330,7 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     clinicContainer.classList.add('hidden');
                 }
 
-                // Status Badge
                 const badge = document.getElementById('modal-status-badge');
                 badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide';
                 if (props.status === 'completed') {
@@ -344,14 +325,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     badge.textContent = 'Scheduled';
                 }
 
-                // Show Modal
                 document.getElementById('appointment-details-modal').classList.remove('hidden');
             }
         });
         calendar.render();
     }
 
-    // Modal Close Function
     window.closeDetailsModal = function() {
         document.getElementById('appointment-details-modal').classList.add('hidden');
     };

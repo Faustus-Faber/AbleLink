@@ -1,127 +1,173 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Http\Controllers\Community;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Community\Conversation;
 use App\Models\Community\Message;
+use App\Models\Auth\User;
 use App\Services\Ai\AiModerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Builder;
 
 class MessageController extends Controller
 {
-    protected $aiModerationService;
+    private AiModerationService $aiModerationService;
 
     public function __construct(AiModerationService $aiModerationService)
     {
         $this->aiModerationService = $aiModerationService;
     }
 
-    public function index()
+    public function index(): View
     {
-        $userId = Auth::id();
-        $conversations = Conversation::where(function($q) use ($userId) {
-                $q->where('user_one_id', $userId)->orWhere('user_two_id', $userId);
-            })
-            ->whereHas('userOne')
-            ->whereHas('userTwo')
-            ->with(['userOne', 'userTwo', 'messages'])
-            ->get();
+        $currentUserId = Auth::id();
+        
+        $conversationQuery = Conversation::where(function(Builder $query) use ($currentUserId) {
+            $userOneConstraint = $query->where('user_one_id', $currentUserId);
+            $userOneConstraint->orWhere('user_two_id', $currentUserId);
+        });
+        
+        $conversationQuery->whereHas('userOne');
+        $conversationQuery->whereHas('userTwo');
+        $conversationQuery->with(['userOne', 'userTwo', 'messages']);
+        
+        $allConversationsList = $conversationQuery->get();
 
-        $users = \App\Models\Auth\User::where('id', '!=', $userId)->get();
+        $userQuery = User::where('id', '!=', $currentUserId);
+        $otherUsersList = $userQuery->get();
 
-        return view('messages.index', compact('conversations', 'users'));
+        return view('messages.index', [
+            'conversations' => $allConversationsList,
+            'users' => $otherUsersList
+        ]);
     }
 
-    public function show($id)
+    public function show(string $conversationId): View
     {
-        $conversation = Conversation::with(['messages', 'userOne', 'userTwo'])->findOrFail($id);
+        $conversationQuery = Conversation::with(['messages', 'userOne', 'userTwo']);
+        $targetConversation = $conversationQuery->findOrFail($conversationId);
         
-        // Authorization check
-        if (Auth::id() !== $conversation->user_one_id && Auth::id() !== $conversation->user_two_id) {
-            abort(403);
+        $currentUserId = Auth::id();
+        $isUserOne = $currentUserId === $targetConversation->user_one_id;
+        $isUserTwo = $currentUserId === $targetConversation->user_two_id;
+        
+        if ($isUserOne === false) {
+            if ($isUserTwo === false) {
+                 abort(403);
+            }
         }
 
-        // Mark messages as read
-        Message::where('conversation_id', $id)
-            ->where('sender_id', '!=', Auth::id())
-            ->update(['is_read' => true]);
+        $unreadMessagesQuery = Message::where('conversation_id', $conversationId);
+        $unreadMessagesQuery->where('sender_id', '!=', $currentUserId);
+        $unreadMessagesQuery->update(['is_read' => true]);
 
-        $userId = Auth::id();
-        $conversations = Conversation::where(function($q) use ($userId) {
-                $q->where('user_one_id', $userId)->orWhere('user_two_id', $userId);
-            })
-            ->whereHas('userOne')
-            ->whereHas('userTwo')
-            ->with(['userOne', 'userTwo'])
-            ->get();
+        $sidebarConversationQuery = Conversation::where(function(Builder $query) use ($currentUserId) {
+            $userOneConstraint = $query->where('user_one_id', $currentUserId);
+            $userOneConstraint->orWhere('user_two_id', $currentUserId);
+        });
+        
+        $sidebarConversationQuery->whereHas('userOne');
+        $sidebarConversationQuery->whereHas('userTwo');
+        $sidebarConversationQuery->with(['userOne', 'userTwo']);
+        
+        $sidebarConversationsList = $sidebarConversationQuery->get();
             
-        $users = \App\Models\Auth\User::where('id', '!=', $userId)->get();
+        $userQuery = User::where('id', '!=', $currentUserId);
+        $otherUsersList = $userQuery->get();
 
-        return view('messages.show', compact('conversation', 'conversations', 'users'));
+        return view('messages.show', [
+            'conversation' => $targetConversation,
+            'conversations' => $sidebarConversationsList,
+            'users' => $otherUsersList
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $incomingRequest): RedirectResponse
     {
-        $request->validate([
+        $incomingRequest->validate([
             'recipient_id' => 'required|exists:users,id',
             'body' => 'nullable|required_without:attachment|string',
             'attachment' => 'nullable|file|max:25600',
         ]);
 
-        // Safety Check for Body
-        if ($request->body && !$this->aiModerationService->isSafe($request->body)) {
-            return back()->with('error', 'Message blocked due to inappropriate content.');
+        $messageBody = $incomingRequest->body;
+        
+        if ($messageBody !== null) {
+            $isSafeContent = $this->aiModerationService->isSafe($messageBody);
+            if ($isSafeContent === false) {
+                return back()->with('error', 'Message blocked due to inappropriate content.');
+            }
         }
 
         $senderId = Auth::id();
-        $recipientId = $request->recipient_id;
+        $recipientId = $incomingRequest->recipient_id;
 
-        // Find or create conversation
-        $conversation = Conversation::where(function ($q) use ($senderId, $recipientId) {
-            $q->where('user_one_id', $senderId)->where('user_two_id', $recipientId);
-        })->orWhere(function ($q) use ($senderId, $recipientId) {
-            $q->where('user_one_id', $recipientId)->where('user_two_id', $senderId);
-        })->first();
+        $existingConversationQuery = Conversation::where(function (Builder $query) use ($senderId, $recipientId) {
+            $constraint = $query->where('user_one_id', $senderId);
+            $constraint->where('user_two_id', $recipientId);
+        });
+        
+        $existingConversationQuery->orWhere(function (Builder $query) use ($senderId, $recipientId) {
+            $constraint = $query->where('user_one_id', $recipientId);
+            $constraint->where('user_two_id', $senderId);
+        });
+        
+        $targetConversation = $existingConversationQuery->first();
 
-        if (!$conversation) {
-            $conversation = Conversation::create([
+        if ($targetConversation === null) {
+            $targetConversation = Conversation::create([
                 'user_one_id' => $senderId,
                 'user_two_id' => $recipientId,
             ]);
         }
 
-        $messageData = [
-            'conversation_id' => $conversation->id,
-            'sender_id' => $senderId,
-            'body' => $request->body ?? ($request->hasFile('attachment') ? 'Sent an attachment' : ''),
-        ];
-
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $path = $file->store('message_attachments', 'public');
-            $messageData['attachment_path'] = $path;
-            $messageData['attachment_type'] = $file->getClientMimeType();
-            $messageData['attachment_original_name'] = $file->getClientOriginalName();
+        $finalBody = $messageBody;
+        if ($finalBody === null) {
+            $hasAttachment = $incomingRequest->hasFile('attachment');
+            if ($hasAttachment === true) {
+                $finalBody = 'Sent an attachment';
+            } else {
+                $finalBody = '';
+            }
         }
 
-        Message::create($messageData);
+        $newMessageData = [];
+        $newMessageData['conversation_id'] = $targetConversation->id;
+        $newMessageData['sender_id'] = $senderId;
+        $newMessageData['body'] = $finalBody;
 
-        return redirect()->route('messages.show', $conversation->id);
+        if ($incomingRequest->hasFile('attachment')) {
+            $uploadedFile = $incomingRequest->file('attachment');
+            $storagePath = $uploadedFile->store('message_attachments', 'public');
+            
+            $newMessageData['attachment_path'] = $storagePath;
+            $newMessageData['attachment_type'] = $uploadedFile->getClientMimeType();
+            $newMessageData['attachment_original_name'] = $uploadedFile->getClientOriginalName();
+        }
+
+        Message::create($newMessageData);
+
+        return redirect()->route('messages.show', $targetConversation->id);
     }
-    public function destroy($id)
-    {
-        $conversation = Conversation::where('id', $id)
-            ->where(function($q) {
-                $q->where('user_one_id', Auth::id())
-                  ->orWhere('user_two_id', Auth::id());
-            })
-            ->firstOrFail();
 
-        $conversation->delete();
+    public function destroy(string $conversationId): RedirectResponse
+    {
+        $currentUserId = Auth::id();
+        $conversationQuery = Conversation::where('id', $conversationId);
+        
+        $conversationQuery->where(function(Builder $query) use ($currentUserId) {
+            $userOneConstraint = $query->where('user_one_id', $currentUserId);
+            $userOneConstraint->orWhere('user_two_id', $currentUserId);
+        });
+        
+        $targetConversation = $conversationQuery->firstOrFail();
+        
+        $targetConversation->messages()->delete();
+        $targetConversation->delete();
 
         return redirect()->route('messages.index')->with('success', 'Conversation deleted.');
     }

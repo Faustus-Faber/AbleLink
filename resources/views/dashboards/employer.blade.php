@@ -1,11 +1,10 @@
-<!-- //F10 - Rifat Jahan Roza -->
+
 @extends('layouts.app')
 
 @section('content')
 <div class="container mx-auto px-6 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <!-- SIDEBAR -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sticky top-24">
                 <div class="text-center mb-6">
@@ -63,9 +62,7 @@
             </div>
         </div>
 
-        <!-- MAIN CONTENT -->
         <div class="lg:col-span-3">
-             <!-- HEADER -->
              <div class="flex justify-between items-end mb-8">
                 <div>
                     <h3 class="text-2xl font-extrabold text-slate-900">Employer Progress</h3>
@@ -76,7 +73,6 @@
                 </a>
             </div>
 
-            <!-- STATS CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center hover:shadow-md transition-all">
                     <div class="w-16 h-16 mx-auto rounded-full bg-indigo-50 border-4 border-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
@@ -101,7 +97,6 @@
                 </div>
             </div>
 
-            <!-- PROGRESS & SHORTLIST -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div class="lg:col-span-2">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
@@ -123,7 +118,6 @@
                 </div>
             </div>
 
-            <!-- FEATURE CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                  <a href="{{ route('employer.jobs.index') }}" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
                     <h6 class="font-bold text-slate-800 text-lg mb-1">Job Management</h6>
@@ -139,7 +133,6 @@
                 </a>
             </div>
 
-             <!-- BOTTOM CARDS -->
              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <a href="{{ route('employer.profile.show') }}" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
                    <h6 class="font-bold text-slate-800 text-lg mb-1">Company Accessibility Profile</h6>

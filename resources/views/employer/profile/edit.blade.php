@@ -3,7 +3,6 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 font-sans">
     
-    {{-- Header --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl pt-12 pb-8">
         <a href="{{ route('employer.profile.show') }}" class="inline-flex items-center text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors mb-6">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -17,13 +16,11 @@
         </p>
     </div>
 
-    {{-- Form Section --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl pb-20">
         <form action="{{ route('employer.profile.update') }}" method="POST" class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 md:p-12 space-y-12">
             @csrf
             @method('PUT')
 
-            {{-- Company Info --}}
             <div class="space-y-8">
                 <h2 class="text-xl font-black text-slate-900 border-b border-slate-100 pb-4">Company Information</h2>
                 
@@ -73,7 +70,6 @@
                 </div>
             </div>
 
-            {{-- Accessibility --}}
             <div class="space-y-8">
                 <h2 class="text-xl font-black text-slate-900 border-b border-slate-100 pb-4">Accessibility Information</h2>
                 

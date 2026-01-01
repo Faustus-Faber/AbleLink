@@ -3,7 +3,6 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 font-sans">
     
-    {{-- Header --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-12 pb-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
@@ -23,7 +22,6 @@
         </div>
     </div>
 
-    {{-- Main Content --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pb-20">
 
         @if (session('success'))
@@ -35,11 +33,9 @@
             </div>
         @endif
 
-        {{-- Filter Bar --}}
         <div class="mb-8 bg-white rounded-3xl shadow-sm border border-slate-100 p-2 pl-6 pr-2">
             <form action="{{ route('employer.jobs.index') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4">
                 
-                {{-- Search --}}
                 <div class="flex-grow w-full md:w-auto py-2">
                     <label for="search" class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Search Jobs</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -49,10 +45,8 @@
 
                 <div class="h-10 w-px bg-slate-100 hidden md:block"></div>
 
-                {{-- Status --}}
                 <div class="w-full md:w-40 py-2">
                      <label for="status" class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Status</label>
-                     {{-- Hybrid Dropdown: Hidden native select (AI) + Premium visual dropdown --}}
                      <div class="relative" x-data="{
                         status: '{{ request('status') }}',
                         open: false,
@@ -75,7 +69,6 @@
                             });
                         }
                      }">
-                        {{-- Hidden Native Select (AI-Compatible) --}}
                         <select name="status" id="status" class="sr-only" tabindex="-1" aria-hidden="true">
                             <option value="" {{ !request('status') ? 'selected' : '' }}>All Status</option>
                             <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -84,7 +77,6 @@
                             <option value="filled" {{ request('status') == 'filled' ? 'selected' : '' }}>Filled</option>
                         </select>
                         
-                        {{-- Premium Visual Dropdown --}}
                         <button type="button" 
                                 @click="open = !open"
                                 @click.away="open = false"
@@ -120,10 +112,8 @@
 
                 <div class="h-10 w-px bg-slate-100 hidden md:block"></div>
 
-                {{-- Job Type --}}
                 <div class="w-full md:w-40 py-2">
                     <label for="job_type_filter" class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Job Type</label>
-                    {{-- Hybrid Dropdown: Hidden native select (AI) + Premium visual dropdown --}}
                     <div class="relative" x-data="{
                         jobType: '{{ request('job_type') }}',
                         open: false,
@@ -146,7 +136,6 @@
                             });
                         }
                     }">
-                        {{-- Hidden Native Select (AI-Compatible) --}}
                         <select name="job_type" id="job_type_filter" class="sr-only" tabindex="-1" aria-hidden="true">
                             <option value="" {{ !request('job_type') ? 'selected' : '' }}>All Types</option>
                             <option value="full-time" {{ request('job_type') == 'full-time' ? 'selected' : '' }}>Full Time</option>
@@ -155,7 +144,6 @@
                             <option value="remote" {{ request('job_type') == 'remote' ? 'selected' : '' }}>Remote</option>
                         </select>
                         
-                        {{-- Premium Visual Dropdown --}}
                         <button type="button" 
                                 @click="open = !open"
                                 @click.away="open = false"
@@ -189,7 +177,6 @@
                     </div>
                 </div>
 
-                {{-- Filter Button --}}
                 <div class="flex-shrink-0">
                     <button type="submit" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-600/20 transition-all">
                         Filter
@@ -208,12 +195,10 @@
                     <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group">
                         <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
                             
-                            {{-- Content --}}
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-4 mb-3">
                                     <h3 class="text-2xl font-black text-slate-900 truncate">{{ $job->title }}</h3>
                                     
-                                    {{-- Status Badge --}}
                                     @php
                                         $statusClasses = match($job->status) {
                                             'active' => 'bg-emerald-100 text-emerald-700',
@@ -270,7 +255,6 @@
                                 </div>
                             </div>
 
-                            {{-- Actions --}}
                             <div class="flex flex-row lg:flex-col gap-3 min-w-[140px]">
                                 <a href="{{ route('employer.jobs.show', $job) }}" class="flex-1 px-5 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 transition-all text-center">
                                     View

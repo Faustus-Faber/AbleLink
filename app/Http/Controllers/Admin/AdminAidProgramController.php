@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-// F20 - Akida Lisi
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +10,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
+/**
+ * Manage aid programs.
+ */
 class AdminAidProgramController extends Controller
 {
     public function index(Request $request): View
@@ -19,7 +20,7 @@ class AdminAidProgramController extends Controller
         $tableReady = Schema::hasTable('aid_programs');
 
         $q = trim((string) $request->query('q', ''));
-        $status = trim((string) $request->query('status', 'active')); // active|inactive|all
+        $status = trim((string) $request->query('status', 'active')); 
 
         $programs = collect();
 
@@ -214,7 +215,7 @@ class AdminAidProgramController extends Controller
             'contact_phone' => ['nullable', 'string', 'max:50'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
-            'tags' => ['nullable', 'string', 'max:1000'], // comma-separated
+            'tags' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $tags = [];

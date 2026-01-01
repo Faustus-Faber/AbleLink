@@ -1,10 +1,8 @@
-{{-- F19 - Evan Munshi --}}
 @extends('layouts.app')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 py-10" x-data="{ activeTab: 'healthcare' }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Health Dashboard</h1>
@@ -38,7 +36,7 @@
             </div>
         @endif
 
-        <!-- Healthcare Tab -->
+
         <div x-show="activeTab === 'healthcare'" class="space-y-8" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
             
             @if($missedMedications->isNotEmpty())
@@ -71,7 +69,6 @@
             @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Diagnosis Card -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
                     <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
                         <div class="flex items-center space-x-3">
@@ -93,7 +90,6 @@
                     </div>
                 </div>
 
-                <!-- Medical History Card -->
                  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
                     <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
                         <div class="flex items-center space-x-3">
@@ -118,7 +114,6 @@
             </div>
         </div>
 
-        <!-- Medication Tab -->
         <div x-show="activeTab === 'medication'" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" style="display: none;">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -194,11 +189,9 @@
             </div>
         </div>
 
-        <!-- Metrics Tab -->
         <div x-show="activeTab === 'metrics'" class="space-y-8" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" style="display: none;">
             
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Add Goal Card -->
                 @if(auth()->user()->isCaregiver())
                      <a href="{{ route('health.goals.create') }}" class="block h-full group">
                         <div class="h-full bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center p-8 hover:border-emerald-500 hover:bg-emerald-50/30 transition-all cursor-pointer">
@@ -234,7 +227,6 @@
                 @endforeach
             </div>
 
-            <!-- Metrics Log -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
@@ -282,7 +274,6 @@
         </div>
     </div>
 
-    <!-- Add Metric Modal -->
     <div id="addMetricModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('addMetricModal').classList.add('hidden')"></div>
@@ -334,6 +325,5 @@
     </div>
 </div>
 
-<!-- Alpine.js -->
 <script src="//unpkg.com/alpinejs" defer></script>
 @endsection

@@ -1,7 +1,36 @@
 <!DOCTYPE html>
+@php
+    // F5 - Rifat Jahan Roza
+    $prefs = $accessibilityPreferences ?? session('accessibility_preferences', []);
 
+    $fontSize = $prefs['font_size'] ?? 'normal';
+    $contrast = $prefs['contrast_mode'] ?? 'normal';
+    $spacing = $prefs['spacing'] ?? 'normal';
+    $cbMode  = $prefs['color_blind_mode'] ?? 'none';
+
+    $bodyClasses = [
+        'access-font-small' => $fontSize === 'small',
+        'access-font-normal' => $fontSize === 'normal',
+        'access-font-large' => $fontSize === 'large',
+        'access-font-xlarge' => $fontSize === 'extra_large',
+        'access-spacing-compact' => $spacing === 'compact',
+        'access-spacing-relaxed' => $spacing === 'relaxed',
+        'access-contrast-high' => $contrast === 'high',
+        'access-contrast-inverted' => $contrast === 'inverted',
+        'access-reduce-motion' => !empty($prefs['animation_reduced']),
+        'access-screen-reader' => !empty($prefs['screen_reader_enabled']),
+        'access-cb-protanopia' => $cbMode === 'protanopia',
+        'access-cb-deuteranopia' => $cbMode === 'deuteranopia',
+        'access-cb-tritanopia' => $cbMode === 'tritanopia',
+    ];
+
+    $bodyClassString = collect($bodyClasses)
+        ->filter()
+        ->keys()
+        ->implode(' ');
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $bodyClassString }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,7 +52,7 @@
     </style>
 </head>
 <a href="#main-content" class="skip-to-content">Skip to main content</a>
-<body class="antialiased text-slate-800 bg-white min-h-screen flex flex-col relative overflow-x-hidden">
+<body class="antialiased text-slate-800 bg-white min-h-screen flex flex-col relative overflow-x-hidden {{ $bodyClassString }}">
 
     <div class="absolute top-0 inset-x-0 h-[400px] bg-gradient-to-br from-blue-600 to-purple-700 z-0 rounded-b-[3rem] shadow-2xl"></div>
 

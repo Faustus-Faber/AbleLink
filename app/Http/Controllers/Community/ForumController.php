@@ -1,146 +1,195 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Http\Controllers\Community;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Community\ForumThread;
 use App\Models\Community\ForumReply;
 use App\Services\Ai\AiModerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ForumController extends Controller
 {
-    protected $aiModerationService;
+    private AiModerationService $aiModerationService;
 
     public function __construct(AiModerationService $aiModerationService)
     {
         $this->aiModerationService = $aiModerationService;
     }
 
-    public function index(Request $request)
+    public function index(Request $incomingRequest): View
     {
-        $query = ForumThread::where('status', 'active');
+        $threadQuery = ForumThread::where('status', 'active');
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('body', 'like', "%{$search}%");
+        $hasSearchTerm = $incomingRequest->has('search');
+        if ($hasSearchTerm === true) {
+            $searchTerm = $incomingRequest->input('search');
+            $threadQuery->where(function(Builder $query) use ($searchTerm) {
+                $titleConstraint = $query->where('title', 'like', "%{$searchTerm}%");
+                $titleConstraint->orWhere('body', 'like', "%{$searchTerm}%");
             });
         }
 
-        $threads = $query->with('user')->withCount('replies')->orderBy('created_at', 'desc')->paginate(10);
-        return view('forum.index', compact('threads'));
+        $threadQuery->with('user');
+        $threadQuery->withCount('replies');
+        $threadQuery->orderBy('created_at', 'desc');
+        
+        $paginatedThreads = $threadQuery->paginate(10);
+        
+        return view('forum.index', ['threads' => $paginatedThreads]);
     }
 
-    public function create()
+    public function create(): View
     {
         return view('forum.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $incomingRequest): RedirectResponse
     {
-        $request->validate([
+        $incomingRequest->validate([
             'title' => 'required|max:255',
             'body' => 'required',
             'category' => 'required',
         ]);
 
-        $status = 'active';
-        $flagReason = null;
+        $threadStatus = 'active';
+        $flagReasonString = null;
 
-        if (!$this->aiModerationService->isSafe($request->body) || !$this->aiModerationService->isSafe($request->title)) {
-            $status = 'flagged';
-            $r1 = $this->aiModerationService->getFlagReason($request->title);
-            $r2 = $this->aiModerationService->getFlagReason($request->body);
-            
-            // Deduplicate reasons
-            $reasons = array_filter([$r1, $r2]);
-            $uniqueReasons = array_unique($reasons);
-            $flagReason = implode('; ', $uniqueReasons) ?: 'Content flagged by AI.';
+        $titleIsSafe = $this->aiModerationService->isSafe($incomingRequest->title);
+        $bodyIsSafe = $this->aiModerationService->isSafe($incomingRequest->body);
+
+        if ($titleIsSafe === false) {
+             $threadStatus = 'flagged';
+        } elseif ($bodyIsSafe === false) {
+             $threadStatus = 'flagged';
         }
 
-        ForumThread::create([
-            'user_id' => Auth::id(),
-            'title' => $request->title,
-            'body' => $request->body,
-            'category' => $request->category,
-            'status' => $status,
-            'flag_reason' => $flagReason,
-        ]);
+        if ($threadStatus === 'flagged') {
+            $reasonOne = $this->aiModerationService->getFlagReason($incomingRequest->title);
+            $reasonTwo = $this->aiModerationService->getFlagReason($incomingRequest->body);
+            
+            $reasonList = [];
+            if ($reasonOne !== null) {
+                $reasonList[] = $reasonOne;
+            }
+            if ($reasonTwo !== null) {
+                $reasonList[] = $reasonTwo;
+            }
+            
+            $uniqueReasonsList = array_unique($reasonList);
+            $joinedReasons = implode('; ', $uniqueReasonsList);
+            
+            if ($joinedReasons === '') {
+                $joinedReasons = 'Content flagged by AI.';
+            }
+            $flagReasonString = $joinedReasons;
+        }
 
-        if ($status === 'flagged') {
+        $newThreadData = [];
+        $newThreadData['user_id'] = Auth::id();
+        $newThreadData['title'] = $incomingRequest->title;
+        $newThreadData['body'] = $incomingRequest->body;
+        $newThreadData['category'] = $incomingRequest->category;
+        $newThreadData['status'] = $threadStatus;
+        $newThreadData['flag_reason'] = $flagReasonString;
+
+        ForumThread::create($newThreadData);
+
+        if ($threadStatus === 'flagged') {
             return redirect()->route('forum.index')->with('warning', 'Your thread has been flagged for review.');
         }
 
         return redirect()->route('forum.index')->with('success', 'Thread created successfully.');
     }
 
-    public function show($id)
+    public function show(string $threadId): View
     {
-        $thread = ForumThread::with(['replies' => function ($query) {
+        $threadQuery = ForumThread::with(['replies' => function (HasMany $query) {
             $query->where('status', 'active');
-        }, 'replies.user'])->findOrFail($id);
+        }, 'replies.user']);
+        
+        $targetThread = $threadQuery->findOrFail($threadId);
 
-        if ($thread->status !== 'active' && Auth::user()->role !== 'admin') {
-            abort(403);
+        $isThreadActive = $targetThread->status === 'active';
+        if ($isThreadActive === false) {
+            $currentUser = Auth::user();
+            $isAdmin = $currentUser->role === 'admin';
+            
+            if ($isAdmin === false) {
+                abort(403);
+            }
         }
 
-        return view('forum.show', compact('thread'));
+        return view('forum.show', ['thread' => $targetThread]);
     }
 
-    public function reply(Request $request, $id)
+    public function reply(Request $incomingRequest, string $threadId): RedirectResponse
     {
-        $request->validate(['body' => 'required']);
+        $incomingRequest->validate(['body' => 'required']);
 
-        $status = 'active';
-        $flagReason = null;
+        $replyStatus = 'active';
+        $flagReasonString = null;
 
-        if (!$this->aiModerationService->isSafe($request->body)) {
-            $status = 'flagged';
-            $flagReason = $this->aiModerationService->getFlagReason($request->body) ?: 'Content flagged by AI.';
+        $isBodySafe = $this->aiModerationService->isSafe($incomingRequest->body);
+        
+        if ($isBodySafe === false) {
+            $replyStatus = 'flagged';
+            $reasonResult = $this->aiModerationService->getFlagReason($incomingRequest->body);
+            
+            if ($reasonResult !== null) {
+                $flagReasonString = $reasonResult;
+            } else {
+                $flagReasonString = 'Content flagged by AI.';
+            }
         }
 
-        ForumReply::create([
-            'forum_thread_id' => $id,
-            'user_id' => Auth::id(),
-            'body' => $request->body,
-            'status' => $status,
-            'flag_reason' => $flagReason,
-        ]);
+        $newReplyData = [];
+        $newReplyData['forum_thread_id'] = $threadId;
+        $newReplyData['user_id'] = Auth::id();
+        $newReplyData['body'] = $incomingRequest->body;
+        $newReplyData['status'] = $replyStatus;
+        $newReplyData['flag_reason'] = $flagReasonString;
 
-        if ($status === 'flagged') {
+        ForumReply::create($newReplyData);
+
+        if ($replyStatus === 'flagged') {
             return back()->with('warning', 'Your reply has been flagged for review.');
         }
 
         return back()->with('success', 'Reply posted.');
     }
 
-    public function destroy($id)
+    public function destroy(string $threadId): RedirectResponse
     {
-        $thread = ForumThread::findOrFail($id);
-
-        if (Auth::id() !== $thread->user_id) {
+        $targetThread = ForumThread::findOrFail($threadId);
+        $currentUserId = Auth::id();
+        
+        $isOwner = $currentUserId === $targetThread->user_id;
+        if ($isOwner === false) {
             abort(403);
         }
 
-        $thread->delete();
+        $targetThread->delete();
 
         return redirect()->route('forum.index')->with('success', 'Thread deleted successfully.');
     }
 
-    public function destroyReply($id)
+    public function destroyReply(string $replyId): RedirectResponse
     {
-        $reply = ForumReply::findOrFail($id);
+        $targetReply = ForumReply::findOrFail($replyId);
+        $currentUserId = Auth::id();
 
-        if (Auth::id() !== $reply->user_id) {
+        $isOwner = $currentUserId === $targetReply->user_id;
+        if ($isOwner === false) {
             abort(403);
         }
 
-        $reply->delete();
+        $targetReply->delete();
 
         return back()->with('success', 'Reply deleted successfully.');
     }

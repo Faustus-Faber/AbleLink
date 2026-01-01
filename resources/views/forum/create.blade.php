@@ -3,7 +3,6 @@
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
     
-    <!-- Breadcrumb / Back Link -->
     <nav class="mb-4">
         <a href="{{ route('forum.index') }}" class="inline-flex items-center px-5 py-2.5 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 hover:shadow-md transition-all">
             <svg class="w-5 h-5 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -12,7 +11,6 @@
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Form -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <div class="p-6">
@@ -134,7 +132,6 @@
             </div>
         </div>
 
-        <!-- Sidebar / Guidelines -->
         <div class="lg:col-span-1 space-y-6">
             <div class="bg-indigo-50/80 backdrop-blur-sm rounded-3xl p-6 border border-indigo-100/50 sticky top-24">
                 <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center">

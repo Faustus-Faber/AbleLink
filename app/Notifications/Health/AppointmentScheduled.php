@@ -1,6 +1,6 @@
 <?php
 
-// F17 - Rifat Jahan Roza
+// F17 - Roza Akter
 namespace App\Notifications\Health;
 
 use App\Models\Health\DoctorAppointment;
@@ -15,9 +15,6 @@ class AppointmentScheduled extends Notification
 
     public $appointment;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(DoctorAppointment $appointment)
     {
         $this->appointment = $appointment;

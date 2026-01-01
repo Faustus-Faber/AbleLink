@@ -7,7 +7,7 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// F17 - Rifat Jahan Roza
+// F17 - Roza Akter
 class DoctorAppointment extends Model
 {
     use HasFactory;

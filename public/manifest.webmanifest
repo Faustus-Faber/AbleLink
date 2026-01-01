@@ -1,0 +1,24 @@
+{
+    "name": "AbleLink",
+    "short_name": "AbleLink",
+    "description": "Accessible community platform with jobs, learning, and aid directory.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#0f172a",
+    "icons": [
+      {
+        "src": "/icons/icon.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any"
+      },
+      {
+        "src": "/icons/maskable-icon.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "maskable"
+      }
+    ]
+  }

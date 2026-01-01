@@ -6,13 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Employment\Job;
+use App\Models\Employment\JobApplication;
+use App\Models\Employment\EmployerProfile;
+use App\Models\Employment\Interview;
+use App\Models\Community\VolunteerProfile;
+use App\Models\Community\AssistanceRequest;
+use App\Models\Community\VolunteerMatch;
+use App\Models\Community\CommunityEvent;
+use App\Models\Community\MatrimonyProfile;
+use App\Models\Health\DoctorAppointment;
 
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    //F1 - Akida Lisi
+    //F1 - Tarannum Al Akida
     public const ROLE_EMPLOYER = 'employer';
     public const ROLE_VOLUNTEER = 'volunteer';
     public const ROLE_DISABLED = 'disabled';
@@ -35,9 +45,6 @@ class User extends Authenticatable
         'otp_verified_at',
         'last_login_at',
         'banned_at',
-        // F12 - Farhan Zarif
-        'skills',
-        'interests',
     ];
 
     protected $hidden = [
@@ -53,13 +60,47 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'banned_at' => 'datetime',
             'password' => 'hashed',
-            // F12 - Farhan Zarif
-            'skills' => 'array',
-            'interests' => 'array',
         ];
     }
 
-    //F1 - Akida Lisi
+    //F4 - Farhan Zarif
+    public function profile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        $relatedModel = UserProfile::class;
+        $relation = $this->hasOne($relatedModel);
+        
+        return $relation;
+    }
+
+    public function patients(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        $relatedModel = User::class;
+        $pivotTable = 'caregiver_user';
+        $foreignKey = 'caregiver_id'; 
+        $relatedPivotKey = 'user_id';  
+        
+        $relation = $this->belongsToMany($relatedModel, $pivotTable, $foreignKey, $relatedPivotKey);
+        $relation->withPivot('status');
+        $relation->withTimestamps();
+        
+        return $relation;
+    }
+
+    public function caregivers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        $relatedModel = User::class;
+        $pivotTable = 'caregiver_user';
+        $foreignKey = 'user_id';        
+        $relatedPivotKey = 'caregiver_id'; 
+        
+        $relation = $this->belongsToMany($relatedModel, $pivotTable, $foreignKey, $relatedPivotKey);
+        $relation->withPivot('status');
+        $relation->withTimestamps();
+        
+        return $relation;
+    }
+    
+    //F1 -Tarannum Al Akida
     public function hasRole($role) 
     {
         return $this->role === $role;
@@ -80,29 +121,83 @@ class User extends Authenticatable
         return $this->banned_at !== null;
     }
 
+    // F19 - Evan Munshi
+    public function isCaregiver(): bool
+    {
+        return $this->role === self::ROLE_CAREGIVER;
+    }
+
     public function hasCompletedOtp(): bool
     {
         return (bool) $this->otp_verified_at;
     }
-
-    //F3 - Evan Yuvraj Munshi
-    public function profile()
+    //F10 - Roza Akter
+    public function jobs()
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->hasMany(Job::class, 'employer_id');
     }
 
-    //F4 - Farhan Zarif
-    public function patients()
+    public function jobApplications()
     {
-        return $this->belongsToMany(User::class, 'caregiver_user', 'caregiver_id', 'user_id')
+        return $this->hasMany(JobApplication::class, 'applicant_id');
+    }
+
+    public function employerProfile()
+    {
+        return $this->hasOne(EmployerProfile::class);
+    }
+
+    public function interviewsAsEmployer()
+    {
+        return $this->hasMany(Interview::class, 'employer_id');
+    }
+
+    public function interviewsAsApplicant()
+    {
+        return $this->hasMany(Interview::class, 'applicant_id');
+    }
+
+    //F14 - Roza Akter
+    public function volunteerProfile()
+    {
+        return $this->hasOne(VolunteerProfile::class);
+    }
+
+    public function assistanceRequests()
+    {
+        return $this->hasMany(AssistanceRequest::class, 'user_id');
+    }
+
+    public function volunteerMatches()
+    {
+        return $this->hasMany(VolunteerMatch::class, 'volunteer_id');
+    }
+    //F16 - Evan Yuvraj Munshi
+    public function communityEvents()
+    {
+        return $this->hasMany(CommunityEvent::class, 'organizer_id');
+    }
+
+    public function eventParticipations()
+    {
+        return $this->belongsToMany(CommunityEvent::class, 'event_participants')
                     ->withPivot('status')
                     ->withTimestamps();
     }
 
-    public function caregivers()
+    public function matrimonyProfile()
     {
-        return $this->belongsToMany(User::class, 'caregiver_user', 'user_id', 'caregiver_id')
-                    ->withPivot('status')
-                    ->withTimestamps();
+        return $this->hasOne(MatrimonyProfile::class);
+    }
+
+    // F17 - Roza Akter
+    public function doctorAppointments()
+    {
+        return $this->hasMany(DoctorAppointment::class);
+    }
+
+    public function caregiverAppointments()
+    {
+        return $this->hasMany(DoctorAppointment::class, 'caregiver_id');
     }
 }

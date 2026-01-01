@@ -3,7 +3,6 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 font-sans">
     
-    {{-- Header --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-12 pb-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
@@ -22,14 +21,11 @@
         </div>
     </div>
 
-    {{-- Main Content --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pb-20">
 
-        {{-- Filter Bar --}}
         <div class="mb-8 bg-white rounded-3xl shadow-sm border border-slate-100 p-2 pl-6 pr-2">
             <form action="{{ route('employer.applications') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4">
                 
-                {{-- Search --}}
                 <div class="flex-grow w-full md:w-auto py-2">
                     <label for="search" class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Search Applications</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -39,10 +35,8 @@
 
                 <div class="h-10 w-px bg-slate-100 hidden md:block"></div>
 
-                {{-- Status --}}
                 <div class="w-full md:w-48 py-2">
                     <label for="filter_status" class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Status</label>
-                    {{-- Hybrid Dropdown: Hidden native select (AI) + Premium visual dropdown --}}
                      <div class="relative" x-data="{
                         status: '{{ request('status') }}',
                         open: false,
@@ -67,7 +61,6 @@
                             });
                         }
                      }">
-                        {{-- Hidden Native Select (AI-Compatible) --}}
                         <select name="status" id="filter_status" class="sr-only" tabindex="-1" aria-hidden="true">
                             <option value="" {{ !request('status') ? 'selected' : '' }}>All Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -78,7 +71,6 @@
                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                         </select>
                         
-                        {{-- Premium Visual Dropdown --}}
                         <button type="button" 
                                 @click="open = !open"
                                 @click.away="open = false"
@@ -112,7 +104,6 @@
                     </div>
                 </div>
 
-                {{-- Filter Button --}}
                 <div class="flex-shrink-0">
                     <button type="submit" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-600/20 transition-all">
                         Filter

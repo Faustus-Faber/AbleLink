@@ -13,7 +13,7 @@ class MedicationLog extends Model
     protected $fillable = [
         'medication_schedule_id',
         'taken_at',
-        'status', // taken, skipped, missed
+        'status', 
         'notes'
     ];
 

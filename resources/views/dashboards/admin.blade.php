@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('admin-content')
-    <!-- HEADER -->
     <div class="flex justify-between items-end mb-8">
         <div>
             <h3 class="text-2xl font-extrabold text-slate-900">Admin Overview</h3>
@@ -9,34 +8,28 @@
         </div>
     </div>
 
-    <!-- TOP STATS -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <!-- Total Users -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center hover:shadow-md transition-all">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Users</p>
             <h3 class="text-3xl font-extrabold text-slate-800">{{ array_sum($counts) }}</h3>
         </div>
 
-        <!-- Volunteers -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center hover:shadow-md transition-all">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Active Volunteers</p>
             <h3 class="text-3xl font-extrabold text-slate-800">{{ $counts['volunteer'] }}</h3>
         </div>
 
-        <!-- Employers -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center hover:shadow-md transition-all">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Employers</p>
             <h3 class="text-3xl font-extrabold text-slate-800">{{ $counts['employer'] }}</h3>
         </div>
 
-        <!-- Caregivers (Replaced Emergency Alerts) -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center hover:shadow-md transition-all">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Caregivers</p>
             <h3 class="text-3xl font-extrabold text-slate-800">{{ $counts['caregiver'] }}</h3>
         </div>
     </div>
 
-    <!-- ACTIVE SOS ALERTS -->
     <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 mb-8">
         <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
             <div>
@@ -115,10 +108,8 @@
         @endif
     </div>
 
-    <!-- DETAILED STATS GRID -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         
-        <!-- User Activity -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
@@ -145,7 +136,6 @@
             </div>
         </div>
 
-        <!-- Job Platform -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
                 <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -172,7 +162,6 @@
             </div>
         </div>
 
-        <!-- Learning Hub -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
                 <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors">
@@ -199,7 +188,6 @@
             </div>
         </div>
 
-        <!-- Community & Safety -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
                 <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">

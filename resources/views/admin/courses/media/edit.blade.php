@@ -3,7 +3,6 @@
 @section('admin-content')
 
 <div class="max-w-4xl mx-auto">
-    <!-- Header -->
     <div class="flex items-center justify-between mb-10">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Edit Media</h1>
@@ -43,7 +42,6 @@
             @endif
 
             <div class="space-y-8">
-                <!-- Kind Selection -->
                 <div x-data="{
                     kind: '{{ old('kind', $media->kind) }}',
                     open: false,
@@ -61,7 +59,6 @@
                         const accessSection = document.getElementById('accessibilitySection');
                         const audioDesc = document.getElementById('audioDescGroup');
 
-                        // Default State
                         if(fileGroup) fileGroup.style.display = 'block';
                         if(urlGroup) urlGroup.style.display = 'block';
                         if(divider) divider.style.display = 'flex';
@@ -85,7 +82,6 @@
                 }">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Media Type</label>
                     
-                    <!-- Custom Dropdown -->
                     <div class="relative">
                         <input type="hidden" name="kind" :value="kind">
                         
@@ -126,7 +122,6 @@
                     </div>
                 </div>
 
-                <!-- Basic Info -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Title <span class="text-slate-400 font-normal normal-case ml-1">(Optional)</span></label>
@@ -140,7 +135,6 @@
                     </div>
                 </div>
 
-                <!-- Media Source Section -->
                 <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
                     <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900 mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
@@ -148,7 +142,6 @@
                     </h3>
                     
                     <div class="space-y-6">
-                        <!-- Current File Info -->
                          @if($media->media_url)
                             <div class="bg-white rounded-xl p-4 border border-slate-200 flex items-center justify-between">
                                 <div>
@@ -169,21 +162,18 @@
                             </div>
                         @endif
 
-                        <!-- File Upload -->
                         <div id="fileUploadGroup">
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Upload New File</label>
                             <input name="media_file" type="file"
                                    class="block w-full text-slate-500 text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-black transition-all cursor-pointer bg-white border border-slate-200 rounded-xl p-1" />
                         </div>
 
-                        <!-- OR Divider -->
                         <div class="relative flex py-1 items-center" id="sourceDivider">
                             <div class="flex-grow border-t border-slate-200"></div>
                             <span class="flex-shrink-0 mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">OR</span>
                             <div class="flex-grow border-t border-slate-200"></div>
                         </div>
 
-                        <!-- External URL -->
                         <div id="urlInputGroup">
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">External URL</label>
                             <input name="external_url" value="{{ old('external_url', $media->external_url) }}" placeholder="https://..."
@@ -192,7 +182,6 @@
                     </div>
                 </div>
 
-                <!-- Accessibility Section -->
                 <div id="accessibilitySection" class="border-t border-slate-100 pt-8">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-6 flex items-center gap-2">
                         <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
@@ -255,7 +244,6 @@
                     </div>
                 </div>
 
-                <!-- Primary Checkbox -->
                 <div class="flex items-center gap-4 bg-slate-50 rounded-xl p-5 border border-slate-100">
                     <div class="flex items-center h-5">
                         <input id="is_primary" name="is_primary" type="checkbox" value="1" {{ old('is_primary', (bool) $media->is_primary) ? 'checked' : '' }}
@@ -268,7 +256,6 @@
                 </div>
             </div>
 
-            <!-- Submit -->
             <div class="mt-10 pt-8 border-t border-slate-100 flex items-center justify-end">
                 <button type="submit" 
                         class="bg-slate-900 text-white font-bold text-sm px-8 py-4 rounded-xl hover:bg-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg hover:shadow-xl">
@@ -278,7 +265,6 @@
         </form>
     </div>
 
-    <!-- Danger Zone Delete -->
     <div class="mt-8 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8">
         <div class="flex items-center justify-between">
             <div>
@@ -300,6 +286,5 @@
 </div>
 
 <script>
-    // Alpine.js now handles the form state logic for media type selection
 </script>
 @endsection

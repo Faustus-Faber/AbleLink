@@ -17,7 +17,6 @@ class AppointmentController extends Controller
     {
         $user = Auth::user();
         
-        // Get all appointments for this user
         $appointments = DoctorAppointment::where('user_id', $user->id)
             ->with(['caregiver'])
             ->orderBy('appointment_date', 'asc')

@@ -9,45 +9,77 @@ use Illuminate\Support\Facades\Auth;
 
 class RecommendationController extends Controller
 {
-    protected $engine;
+    protected RecommendationEngine $engine;
 
     public function __construct(RecommendationEngine $engine)
     {
         $this->engine = $engine;
     }
 
-    public function getJobs()
+    public function getJobs(): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
-        if (!$user) return response()->json(['needsLogin' => true, 'items' => []]);
+        if ($user === null) {
+            return response()->json(['needsLogin' => true, 'items' => []]);
+        }
 
-        // Check if user needs to set up skills
-        $userSkills = $user->profile?->skills ?? [];
-        $needsSetup = empty($userSkills);
+        $userSkills = [];
+        if ($user->profile !== null) {
+            if ($user->profile->skills !== null) {
+                $userSkills = $user->profile->skills;
+            }
+        }
+        
+        $needsSetup = false;
+        if (empty($userSkills)) {
+            $needsSetup = true;
+        }
 
-        // Ensure we load employer relationship for the view
-        $recommendations = $this->engine->getJobRecommendations($user, 5)->map(function ($item) {
+        $recommendations = $this->engine->getJobRecommendations($user, 5);
+        $processedRecommendations = [];
+
+        foreach ($recommendations as $item) {
             $job = $item['job'];
             $job->load('employer.employerProfile');
-            // Explicitly attach company name to avoid JS traversal issues
-            $item['company_name'] = $job->employer?->employerProfile?->company_name ?? 'Company Confidential';
-            return $item;
-        });
+            
+            $companyName = 'Company Confidential';
+            
+            if ($job->employer !== null) {
+                if ($job->employer->employerProfile !== null) {
+                    if ($job->employer->employerProfile->company_name !== null) {
+                        $companyName = $job->employer->employerProfile->company_name;
+                    }
+                }
+            }
+            
+            $item['company_name'] = $companyName;
+            $processedRecommendations[] = $item;
+        }
 
         return response()->json([
             'needsSetup' => $needsSetup,
-            'items' => $recommendations
+            'items' => $processedRecommendations
         ]);
     }
 
-    public function getCourses()
+    public function getCourses(): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
-        if (!$user) return response()->json(['needsLogin' => true, 'items' => []]);
+        if ($user === null) {
+            return response()->json(['needsLogin' => true, 'items' => []]);
+        }
 
-        // Check if user needs to set up interests
-        $userInterests = $user->profile?->interests ?? [];
-        $needsSetup = empty($userInterests);
+        $userInterests = [];
+        if ($user->profile !== null) {
+            if ($user->profile->interests !== null) {
+                $userInterests = $user->profile->interests;
+            }
+        }
+
+        $needsSetup = false;
+        if (empty($userInterests)) {
+            $needsSetup = true;
+        }
 
         $recommendations = $this->engine->getCourseRecommendations($user, 5);
         
@@ -57,12 +89,19 @@ class RecommendationController extends Controller
         ]);
     }
 
-    public function updatePreferences(Request $request)
+    public function updatePreferences(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
-        if (!$user || !$user->profile) {
-            // Ensure profile exists
-             if ($user) \App\Models\Auth\UserProfile::firstOrCreate(['user_id' => $user->id]);
+        
+        if ($user !== null) {
+            if ($user->profile === null) {
+                 \App\Models\Auth\UserProfile::firstOrCreate(['user_id' => $user->id]);
+                 $user->refresh();
+            }
+        } 
+        else {
+
+             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
 
         $validated = $request->validate([
@@ -71,21 +110,28 @@ class RecommendationController extends Controller
             'learning_style' => 'nullable|string|in:visual,auditory,text',
         ]);
 
-        // Merge logic: Don't overwrite existing if not provided
         $updateData = [];
-        if ($request->has('skills')) $updateData['skills'] = $request->skills;
-        if ($request->has('interests')) $updateData['interests'] = $request->interests;
-        if ($request->has('learning_style')) $updateData['learning_style'] = $request->learning_style;
+        if ($request->has('skills')) {
+            $updateData['skills'] = $request->skills;
+        }
+        
+        if ($request->has('interests')) {
+            $updateData['interests'] = $request->interests;
+        }
+        
+        if ($request->has('learning_style')) {
+            $updateData['learning_style'] = $request->learning_style;
+        }
 
-        $user->profile->update($updateData);
+        if ($user->profile !== null) {
+            $user->profile->update($updateData);
+        }
 
         return response()->json(['success' => true, 'message' => 'Preferences updated']);
     }
 
-    public function dismiss(Request $request)
+    public function dismiss(Request $request): \Illuminate\Http\JsonResponse
     {
-        // Placeholder for Feedback Loop
-        // Would save to 'recommendation_feedback' table
         return response()->json(['success' => true]);
     }
 }

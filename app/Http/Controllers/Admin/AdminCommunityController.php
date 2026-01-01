@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Community\ForumThread; // Assuming this model exists based on usage in AdminController
+use App\Models\Community\ForumThread;
 use Illuminate\Http\Request;
 
+/**
+ * Manage community forum threads.
+ */
 class AdminCommunityController extends Controller
 {
     /**
@@ -19,7 +22,7 @@ class AdminCommunityController extends Controller
             $search = $request->get('search');
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%") // Assuming content field exists
+                  ->orWhere('content', 'like', "%{$search}%") 
                   ->orWhereHas('user', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%");
                   });

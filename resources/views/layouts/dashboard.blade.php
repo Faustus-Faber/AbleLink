@@ -1,5 +1,34 @@
 <!DOCTYPE html>
+@php
+    // F5 - Rifat Jahan Roza
+    $prefs = $accessibilityPreferences ?? session('accessibility_preferences', []);
 
+    $fontSize = $prefs['font_size'] ?? 'normal';
+    $contrast = $prefs['contrast_mode'] ?? 'normal';
+    $spacing = $prefs['spacing'] ?? 'normal';
+    $cbMode  = $prefs['color_blind_mode'] ?? 'none';
+
+    $bodyClasses = [
+        'access-font-small' => $fontSize === 'small',
+        'access-font-normal' => $fontSize === 'normal',
+        'access-font-large' => $fontSize === 'large',
+        'access-font-xlarge' => $fontSize === 'extra_large',
+        'access-spacing-compact' => $spacing === 'compact',
+        'access-spacing-relaxed' => $spacing === 'relaxed',
+        'access-contrast-high' => $contrast === 'high',
+        'access-contrast-inverted' => $contrast === 'inverted',
+        'access-reduce-motion' => !empty($prefs['animation_reduced']),
+        'access-screen-reader' => !empty($prefs['screen_reader_enabled']),
+        'access-cb-protanopia' => $cbMode === 'protanopia',
+        'access-cb-deuteranopia' => $cbMode === 'deuteranopia',
+        'access-cb-tritanopia' => $cbMode === 'tritanopia',
+    ];
+
+    $bodyClassString = collect($bodyClasses)
+        ->filter()
+        ->keys()
+        ->implode(' ');
+@endphp
 <!DOCTYPE html>
 <html lang="en" class="{{ $bodyClassString }}">
 <head>
@@ -11,7 +40,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
-
+    <link rel="stylesheet" href="{{ asset('css/accessibility.css') }}">
 
     @vite(['resources/js/app.js'])
 
@@ -24,7 +53,7 @@
 </head>
 
 <a href="#main-content" class="skip-to-maincontent">Skip to main content</a>
-<body class="@auth theme-{{ Auth::user()->disability_type ?? 'default' }} @endauth">
+<body class="@auth theme-{{ Auth::user()->disability_type ?? 'default' }} @endauth {{ $bodyClassString }}">
 
     <nav class="px-4 d-flex align-items-center justify-content-between"
          style="height:60px;background:linear-gradient(135deg,#7fd3ff,#b194ff);color:#ffffff;">

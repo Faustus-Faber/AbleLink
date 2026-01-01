@@ -16,10 +16,6 @@ class NotificationController extends Controller
     {
         $notifications = Auth::user()->notifications()->paginate(15);
         
-        // Mark all as read when visiting the full index? Or just list them?
-        // Usually index page marks them as read or lets user do it. 
-        // For simple UX, let's keep them unread until clicked or explicitly marked.
-        
         return view('notifications.index', compact('notifications'));
     }
 
@@ -34,7 +30,7 @@ class NotificationController extends Controller
             $notification->markAsRead();
         }
 
-        return redirect()->back(); // Or json response if ajax
+        return redirect()->back(); 
     }
 
     /**

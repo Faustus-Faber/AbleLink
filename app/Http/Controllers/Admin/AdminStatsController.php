@@ -2,8 +2,6 @@
  
 namespace App\Http\Controllers\Admin;
 
-// F20 - Akida Lisi
- 
 use App\Http\Controllers\Controller;
 use App\Models\Employment\Job;
 use App\Models\Auth\User;
@@ -12,7 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
- 
+
+/**
+ * Manage user statistics and role-based user creation.
+ */
 class AdminStatsController extends Controller
 {
    

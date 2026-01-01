@@ -1,6 +1,5 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
 
 namespace App\Http\Controllers\Employer;
 
@@ -10,7 +9,6 @@ use App\Models\Employment\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-//F10 - Employer Job Posting & Dashboard - Interviews
 class InterviewController extends Controller
 {
     public function index()
@@ -66,10 +64,8 @@ class InterviewController extends Controller
 
         $interview = Interview::create($validated);
 
-        // F9 - Evan Munshi
-        // Notify the applicant about the scheduled interview
+        //F9 - Evan Munshi
         $application->applicant->notify(new \App\Notifications\Employment\InterviewScheduled($interview));
-        // F9 - Evan Munshi
 
         return redirect()->route('employer.interviews.index')
             ->with('success', 'Interview scheduled successfully!');

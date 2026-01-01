@@ -3,7 +3,6 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 font-sans">
     
-    {{-- Header --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-12 pb-8">
         <h1 class="text-3xl font-black text-slate-900 tracking-tight">
             Reports & Analytics
@@ -13,10 +12,8 @@
         </p>
     </div>
 
-    {{-- Main Content --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pb-20">
         
-        {{-- Stats Overview --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group">
                 <h3 class="font-bold text-slate-500 text-sm uppercase tracking-widest mb-4">Total Jobs</h3>
@@ -34,7 +31,6 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             
-            {{-- Applications by Status --}}
             <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 md:p-10">
                 <h2 class="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
                     <span class="w-2 h-8 bg-indigo-500 rounded-full"></span>
@@ -51,7 +47,6 @@
                 </div>
             </div>
 
-            {{-- Upcoming Interviews --}}
             <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 md:p-10">
                 <h2 class="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
                     <span class="w-2 h-8 bg-emerald-500 rounded-full"></span>
@@ -85,7 +80,6 @@
             </div>
         </div>
 
-        {{-- Recent Applications --}}
         <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 md:p-10">
             <h2 class="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
                 <span class="w-2 h-8 bg-purple-500 rounded-full"></span>

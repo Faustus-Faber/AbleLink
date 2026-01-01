@@ -1,13 +1,13 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Models\Community;
 
 use App\Models\Auth\User;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class Message extends Model
 {
@@ -23,37 +23,32 @@ class Message extends Model
         'attachment_original_name',
     ];
 
-    /**
-     * Encrypt the body before saving.
-     */
-    public function setBodyAttribute($value)
+    public function setBodyAttribute(string $plainTextBody): void
     {
-        $this->attributes['body'] = \Illuminate\Support\Facades\Crypt::encryptString($value);
+        $this->attributes['body'] = Crypt::encryptString($plainTextBody);
     }
 
-    /**
-     * Decrypt the body when retrieving.
-     */
-    public function getBodyAttribute($value)
+    public function getBodyAttribute(string $encryptedBody): string
     {
         try {
-            return \Illuminate\Support\Facades\Crypt::decryptString($value);
-        } catch (\Exception $e) {
-            // If decryption fails, return a friendly message or the value if it looks like plain text
-            // Checking if it looks like an encrypted payload (basic check)
-            if (str_starts_with($value, 'eyJ')) {
+            return Crypt::decryptString($encryptedBody);
+        } catch (\Exception $exception) {
+            $isPotentialEncryptedString = Str::startsWith($encryptedBody, 'eyJ');
+            
+            if ($isPotentialEncryptedString === true) {
                  return '[Message cannot be decrypted]';
             }
-            return $value;
+            
+            return $encryptedBody;
         }
     }
 
-    public function conversation()
+    public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
     }
 
-    public function sender()
+    public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
     }

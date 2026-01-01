@@ -7,7 +7,7 @@ use App\Models\Community\AssistanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-//F14 - Rifat Jahan Roza
+//F14 - Roza Akter
 class UserAssistanceController extends Controller
 {
     /**
@@ -56,9 +56,20 @@ class UserAssistanceController extends Controller
      */
     public function show(AssistanceRequest $assistanceRequest)
     {
-        // Ensure the user owns this request
-        if ($assistanceRequest->user_id !== Auth::id()) {
-            abort(403);
+        $user = Auth::user();
+        
+        if ($assistanceRequest->user_id !== $user->id) {
+            $isLinkedCaregiver = false;
+            if ($user->hasRole('caregiver')) {
+                 $isLinkedCaregiver = $user->patients()
+                    ->where('users.id', $assistanceRequest->user_id)
+                    ->wherePivot('status', 'active')
+                    ->exists();
+            }
+
+            if (!$isLinkedCaregiver) {
+                abort(403);
+            }
         }
 
         return view('user.assistance.show', ['request' => $assistanceRequest]);

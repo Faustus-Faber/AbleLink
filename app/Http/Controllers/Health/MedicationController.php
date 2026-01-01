@@ -22,7 +22,7 @@ class MedicationController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['caregiver_id'] = Auth::id(); // Assuming caregiver is creating this
+        $validated['caregiver_id'] = Auth::id(); 
 
         MedicationSchedule::create($validated);
 

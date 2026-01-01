@@ -19,7 +19,7 @@ class HealthMetricController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id(); // Assuming user logs their own metrics
+        $validated['user_id'] = Auth::id(); 
         $validated['measured_at'] = now();
 
         HealthMetric::create($validated);

@@ -10,12 +10,14 @@ class AiService
     private string $apiKey;
     private string $apiUrl;
     private string $model;
+    private PythonAiService $pythonAi;
 
-    public function __construct()
+    public function __construct(PythonAiService $pythonAi)
     {
         $this->apiKey = trim(env('AI_API_KEY', ''));
         $this->apiUrl = trim(env('AI_API_URL', ''));
         $this->model = trim(env('AI_MODEL', 'openai-gpt-oss-120b'));
+        $this->pythonAi = $pythonAi;
     }
 
     public function processMessage(string $message, string $currentUrl, ?array $pageStructure = null): array
@@ -24,36 +26,72 @@ class AiService
             return ['reply' => "API Key missing!", 'action' => 'none', 'voice_summary' => "I have no brain."];
         }
 
-        // 1. Context Building
         $routesJson = json_encode($this->getRouteMap());
         
-        // RBAC Context (F7 Enhancement)
         $userRole = auth()->check() ? auth()->user()->role : 'guest';
         $isAuthenticated = auth()->check() ? 'true' : 'false';
+
+        $knowledgeContext = $this->pythonAi->retrieveContext($message);
+        $ragSection = $knowledgeContext ? "\n<relevant_knowledge>\n$knowledgeContext\n</relevant_knowledge>\n" : "";
         
         $domContext = "No visible interactive elements.";
-        $detectedInputs = []; // F9 - Evan Munshi (Explicit Field Extraction)
+        $detectedInputs = [];
 
         if ($pageStructure && isset($pageStructure['elements'])) {
             $elements = $pageStructure['elements'];
             $domContext = "Visible Elements on Screen:\n" . json_encode($elements);
             
-            // Extract Inputs and Options for Explicit Prompting
             foreach ($elements as $el) {
-                if (in_array($el['tag'], ['input', 'textarea', 'select'])) {
-                    $label = $el['text'] ?? $el['name'] ?? $el['id'];
-                    $type = $el['type'] ?? $el['tag'];
+                $tagType = $el['tag'];
+                $isInput = $tagType === 'input';
+                $isTextArea = $tagType === 'textarea';
+                $isSelect = $tagType === 'select';
+                
+                if ($isInput || $isTextArea || $isSelect) {
+                    $label = $el['id'];
+                    $hasText = false;
+                    $hasName = false;
                     
-                    // Special handling for checkboxes - show them clearly
+                    if (array_key_exists('text', $el)) {
+                        $label = $el['text'];
+                        $hasText = true;
+                    }
+                    if ($hasText === false) {
+                        if (array_key_exists('name', $el)) {
+                            $label = $el['name'];
+                            $hasName = true;
+                        }
+                    }
+
+                    $type = $tagType;
+                    if (array_key_exists('type', $el)) {
+                        $type = $el['type'];
+                    }
+                    
                     if ($type === 'checkbox') {
-                        $checkedState = isset($el['checked']) && $el['checked'] ? 'CHECKED' : 'UNCHECKED';
+                        $checkedState = 'UNCHECKED';
+                        if (isset($el['checked'])) {
+                           if ($el['checked']) {
+                               $checkedState = 'CHECKED';
+                           }
+                        }
+                        
                         $info = "- {$label} (ID: #{$el['id']}, Type: CHECKBOX, Currently: {$checkedState}) [Use value \"true\" to check, \"false\" to uncheck]";
                     } else {
                         $info = "- {$label} (ID: #{$el['id']}, Type: {$type})";
                         
-                        if ($el['tag'] === 'select' && !empty($el['options'])) {
-                            $opts = array_map(fn($o) => "{$o['value']} ({$o['text']})", $el['options']);
-                            $info .= " [Select one of these EXACT values: " . implode(', ', $opts) . "]";
+                        $isSelectTag = $el['tag'] === 'select';
+                        $hasOptions = !empty($el['options']);
+                        
+                        if ($isSelectTag) {
+                            if ($hasOptions) {
+                                $opts = [];
+                                foreach ($el['options'] as $o) {
+                                    $opts[] = "{$o['value']} ({$o['text']})";
+                                }
+                                $joinedOpts = implode(', ', $opts);
+                                $info = $info . " [Select one of these EXACT values: " . $joinedOpts . "]";
+                            }
                         }
                     }
                     
@@ -70,7 +108,6 @@ class AiService
             Log::warning("No inputs detected in PageStructure", ['structure' => $pageStructure]);
         }
 
-        // Build stored fields context (for interactive form fill duplicate prevention)
         $storedFields = session('ablebot_stored_fields', []);
         $storedFieldsContext = "No fields stored yet.";
         if (!empty($storedFields)) {
@@ -83,7 +120,6 @@ class AiService
         }
 
 
-        // 2. Tool Definitions (OpenAI Spec)
         $tools = [
             [
                 'type' => 'function',
@@ -154,7 +190,6 @@ class AiService
                 ]
             ],
 
-            // Phase 5: Confirmation Dialog Tool
             [
                 'type' => 'function',
                 'function' => [
@@ -172,7 +207,6 @@ class AiService
                     ]
                 ]
             ],
-            // Phase 4: Read Page Tool
             [
                 'type' => 'function',
                 'function' => [
@@ -187,8 +221,6 @@ class AiService
                     ]
                 ]
             ],
-            // F18 - Farhan Zarif (Upload File Tool)
-            // Upload File Tool
             [
                 'type' => 'function',
                 'function' => [
@@ -203,7 +235,6 @@ class AiService
                     ]
                 ]
             ],
-            // F7 - Composite Send Message Tool (atomic action)
             [
                 'type' => 'function',
                 'function' => [
@@ -218,7 +249,6 @@ class AiService
                     ]
                 ]
             ],
-            // Interactive Form Fill - Store a single field value
             [
                 'type' => 'function',
                 'function' => [
@@ -238,7 +268,6 @@ class AiService
             ],
         ];
 
-        // 3. System Prompt (F7/F18 - Production-Grade XML Structure)
         $systemPrompt = <<<EOT
 <system>
 <identity>
@@ -247,6 +276,7 @@ AbleLink empowers people with disabilities through Employment, Community, Health
 </identity>
 
 <website_context>
+{$ragSection}
 AbleLink is a comprehensive digital platform for people with disabilities. Here is what you should know:
 
 USER ROLES:
@@ -398,11 +428,9 @@ KEEP IT:
 EOT;
 
         try {
-            // Smart History: Conditional activation for interactive mode only
             $interactiveMode = session('ablebot_interactive_mode', false);
             $history = session('ablebot_history', []);
             
-            // Check if this message triggers interactive mode
             $triggerPhrases = ['help me fill the form', 'guide me through', 'help me fill', 'help fill the form'];
             $isInteractiveTrigger = false;
             foreach ($triggerPhrases as $phrase) {
@@ -410,15 +438,15 @@ EOT;
                     $isInteractiveTrigger = true;
                     $interactiveMode = true;
                     session(['ablebot_interactive_mode' => true]);
-                    $history = []; // Start fresh for interactive mode
+                    $history = []; 
                     session(['ablebot_history' => []]);
-                    session(['ablebot_stored_fields' => []]); // Clear stored fields for fresh start
+                    session(['ablebot_stored_fields' => []]); 
                     Log::info("AbleBot: Interactive mode ACTIVATED, stored fields cleared");
                     break;
                 }
             }
             
-            // Build messages array - only include history if in interactive mode
+
             $messages = [['role' => 'system', 'content' => $systemPrompt]];
             if ($interactiveMode) {
                 foreach ($history as $h) {
@@ -427,18 +455,21 @@ EOT;
             }
             $messages[] = ['role' => 'user', 'content' => $message];
             
-            // OpenAI Spec Request
-            $response = Http::withOptions(['verify' => false, 'timeout' => 60])
-                ->withHeaders([
+
+            $httpRequest = Http::withOptions(['verify' => false, 'timeout' => 60]);
+            $httpRequestWithHeaders = $httpRequest->withHeaders([
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer ' . $this->apiKey
-                ])
-                ->post($this->apiUrl, [
+                ]);
+            
+            $postData = [
                     'model' => $this->model,
                     'messages' => $messages,
                     'tools' => $tools,
                     'tool_choice' => 'auto'
-                ]);
+                ];
+            
+            $response = $httpRequestWithHeaders->post($this->apiUrl, $postData);
 
             if ($response->failed()) {
                 Log::error("AI Error {$response->status()}: " . $response->body());
@@ -446,12 +477,21 @@ EOT;
             }
 
             $data = $response->json();
-            $choice = $data['choices'][0]['message'] ?? null;
+            $choice = null;
+            if (isset($data['choices'][0]['message'])) {
+                 $choice = $data['choices'][0]['message'];
+            }
             
             Log::info("MegaLLM Choice", [$choice]);
 
-            // 4. Handle Response
-            if (isset($choice['tool_calls']) && count($choice['tool_calls']) > 0) {
+            $hasToolCalls = false;
+            if (isset($choice['tool_calls'])) {
+                if (count($choice['tool_calls']) > 0) {
+                    $hasToolCalls = true;
+                }
+            }
+
+            if ($hasToolCalls === true) {
                 $actions = [];
                 $summary = "";
 
@@ -460,62 +500,72 @@ EOT;
                     $toolName = $func['name'];
                     $args = json_decode($func['arguments'], true);
 
-                    // FEEDBACK OVERRIDE (Interactive Mode)
-                    if (isset($args['feedback_question']) && !empty($args['feedback_question'])) {
-                        $summary = $args['feedback_question'];
+                    if (isset($args['feedback_question'])) {
+                        if (!empty($args['feedback_question'])) {
+                             $summary = $args['feedback_question'];
+                        }
                     }
 
-                    // Special Handling for "fill_form" Super Tool
-                    // Explode it into fill_input for text/select fields, click_element for checkboxes
                     if ($toolName === 'fill_form') {
-                         if (isset($args['fields']) && is_array($args['fields'])) {
-                             $fieldNames = [];
-                             $checkboxCount = 0;
-                             foreach ($args['fields'] as $field) {
-                                 $selector = $field['selector'] ?? '';
-                                 $value = $field['value'] ?? '';
-                                 
-                                 // Detect checkbox by value (true/false/checked/unchecked)
-                                 $isCheckbox = in_array(strtolower($value), ['true', 'false', 'checked', 'unchecked', '1', '0', 'yes', 'no']);
-                                 $shouldCheck = in_array(strtolower($value), ['true', 'checked', '1', 'yes']);
-                                 
-                                 if ($isCheckbox) {
-                                     // For checkboxes, only click if we want to CHECK it
-                                     // (clicking toggles state, so we only click when shouldCheck=true)
-                                     if ($shouldCheck) {
-                                         $actions[] = [
-                                             'name' => 'click_element',
-                                             'args' => ['selector' => $selector]
-                                         ];
-                                         $checkboxCount++;
+                         if (isset($args['fields'])) {
+                             if (is_array($args['fields'])) {
+                                 $fieldNames = [];
+                                 $checkboxCount = 0;
+                                 foreach ($args['fields'] as $field) {
+                                     $selector = '';
+                                     if (array_key_exists('selector', $field)) {
+                                         $selector = $field['selector'];
                                      }
-                                 } else {
-                                     // Regular text/select field
-                                     $actions[] = [
-                                         'name' => 'fill_input',
-                                         'args' => [
-                                             'selector' => $selector,
-                                             'value' => $value
-                                         ]
-                                     ];
+                                     
+                                     $value = '';
+                                     if (array_key_exists('value', $field)) {
+                                         $value = $field['value'];
+                                     }
+                                     
+                                     $lowerValue = strtolower($value);
+                                     $checkBoxValues = ['true', 'false', 'checked', 'unchecked', '1', '0', 'yes', 'no'];
+                                     $isCheckbox = in_array($lowerValue, $checkBoxValues);
+                                     
+                                     $checkValues = ['true', 'checked', '1', 'yes'];
+                                     $shouldCheck = in_array($lowerValue, $checkValues);
+                                     
+                                     if ($isCheckbox) {
+                                         if ($shouldCheck) {
+                                             $actions[] = [
+                                                 'name' => 'click_element',
+                                                 'args' => ['selector' => $selector]
+                                             ];
+                                             $checkboxCount = $checkboxCount + 1;
+                                         }
+                                     } else {
+                                         $actions[] = [
+                                             'name' => 'fill_input',
+                                             'args' => [
+                                                 'selector' => $selector,
+                                                 'value' => $value
+                                             ]
+                                         ];
+                                     }
+                                     $fieldNames[] = $selector;
                                  }
-                                 $fieldNames[] = $selector;
+                                 
+                                 $summary = "Form filled";
+                                 if ($checkboxCount > 0) {
+                                     $summary = $summary . " with $checkboxCount checkbox(es) checked";
+                                 }
+                                 $summary = $summary . ". Ready to submit?";
                              }
-                             $summary = "Form filled";
-                             if ($checkboxCount > 0) {
-                                 $summary .= " with $checkboxCount checkbox(es) checked";
-                             }
-                             $summary .= ". Ready to submit?";
                          }
-                         continue; // Skip adding the raw 'fill_form' action
+                         continue;
                     }
                     
-                    // F7 - Composite Send Message Tool Handler
-                    // Explode into fill_input + click_element for atomic messaging
                     if ($toolName === 'send_message') {
-                        $messageContent = $args['content'] ?? '';
+                        $messageContent = '';
+                        if (array_key_exists('content', $args)) {
+                            $messageContent = $args['content'];
+                        }
+                        
                         if (!empty($messageContent)) {
-                            // Action 1: Fill the message input
                             $actions[] = [
                                 'name' => 'fill_input',
                                 'args' => [
@@ -523,7 +573,6 @@ EOT;
                                     'value' => $messageContent
                                 ]
                             ];
-                            // Action 2: Click the send button
                             $actions[] = [
                                 'name' => 'click_element',
                                 'args' => [
@@ -532,65 +581,82 @@ EOT;
                             ];
                             $summary = "Message sent!";
                         }
-                        continue; // Skip adding the raw 'send_message' action
+                        continue;   
                     }
                     
-                    // Interactive Form Fill - Store field value (new handler)
                     if ($toolName === 'store_field') {
-                        $selector = $args['selector'] ?? '';
-                        $value = $args['value'] ?? '';
-                        $nextQuestion = $args['next_question'] ?? '';
-                        $allCollected = $args['all_collected'] ?? false;
-                        
-                        // Store the field value in session for duplicate prevention
-                        $storedFields = session('ablebot_stored_fields', []);
-                        if (!empty($selector) && !empty($value)) {
-                            $storedFields[$selector] = $value;
-                            session(['ablebot_stored_fields' => $storedFields]);
-                            Log::info("AbleBot: Stored field", ['selector' => $selector, 'value' => $value, 'total_stored' => count($storedFields)]);
+                        $selector = '';
+                        if (array_key_exists('selector', $args)) {
+                            $selector = $args['selector'];
                         }
                         
-                        // Pass the store_field action to frontend
+                        $value = '';
+                        if (array_key_exists('value', $args)) {
+                            $value = $args['value'];
+                        }
+                        
+                        $nextQuestion = '';
+                        if (array_key_exists('next_question', $args)) {
+                            $nextQuestion = $args['next_question'];
+                        }
+                        
+                        $allCollected = false;
+                        if (array_key_exists('all_collected', $args)) {
+                            $allCollected = $args['all_collected'];
+                        }
+                        
+                        $storedFields = session('ablebot_stored_fields', []);
+                        if (!empty($selector)) {
+                            if (!empty($value)) {
+                                $storedFields[$selector] = $value;
+                                session(['ablebot_stored_fields' => $storedFields]);
+                                Log::info("AbleBot: Stored field", ['selector' => $selector, 'value' => $value, 'total_stored' => count($storedFields)]);
+                            }
+                        }
+                        
                         $actions[] = [
                             'name' => 'store_field',
                             'args' => [
                                 'selector' => $selector,
                                 'value' => $value,
                                 'all_collected' => $allCollected,
-                                'verify_before_reset' => $allCollected // Trigger verification
+                                'verify_before_reset' => $allCollected  
                             ]
                         ];
                         
                         if ($allCollected) {
                             $summary = "Got it! All fields collected. Verifying and filling the form now...";
-                            // Reset interactive mode, history, and stored fields after form fill
                             session(['ablebot_interactive_mode' => false]);
                             session(['ablebot_history' => []]);
-                            session(['ablebot_stored_fields' => []]); // Clear stored fields
+                            session(['ablebot_stored_fields' => []]);
                             Log::info("AbleBot: Interactive mode DEACTIVATED - form complete, stored fields cleared");
                         } else {
-                            $summary = $nextQuestion ?: "Got it! Stored: {$selector}. Next field?";
+                            $summary = "Got it! Stored: {$selector}. Next field?";
+                            if (!empty($nextQuestion)) {
+                                $summary = $nextQuestion;
+                            }
                         }
-                        continue; // Skip adding raw action
+                        continue; 
                     }
 
 
-                    // Handling for upload file (Context Extraction)
                     if ($toolName === 'upload_file') {
                         preg_match('/\[Attached File: (.*?)\|(.*?)\]/', $message, $matches);
                         if (isset($matches[1])) {
                             $args['url'] = $matches[1];
-                            $args['filename'] = $matches[2] ?? 'file';
-                            $summary = "Uploading your file: " . ($matches[2] ?? 'file');
+                            $args['filename'] = 'file';
+                            if (isset($matches[2])) {
+                                $args['filename'] = $matches[2];
+                            }
+                            $summary = "Uploading your file: " . $args['filename'];
                         } else {
                             preg_match('/\[Attached File: (.*?)\]/', $message, $backup);
                             if (isset($backup[1])) {
                                 $args['url'] = $backup[1];
                                 $summary = "Uploading the attached file.";
                             } else {
-                                // No file attached
                                 $summary = "I don't see an attached file. Please attach a file first using the paperclip icon.";
-                                continue; // Skip adding the action
+                                continue; 
                             }
                         }
                     }
@@ -598,7 +664,6 @@ EOT;
                     $actions[] = ['name' => $toolName, 'args' => $args];
                     
                     if ($summary === "") {
-                        // Better default summaries
                         $toolSummaries = [
                             'navigate' => 'Navigating to page.',
                             'fill_input' => 'Filling out the field.',
@@ -607,20 +672,33 @@ EOT;
                             'confirm_action' => 'Asking for confirmation.',
                             'toggle_checkbox' => 'Toggling checkbox.',
                         ];
-                        $summary = $toolSummaries[$toolName] ?? "Executing action.";
+                        
+                        $summary = "Executing action.";
+                        if (array_key_exists($toolName, $toolSummaries)) {
+                            $summary = $toolSummaries[$toolName];
+                        }
                     }
                 }
 
-                // User-friendly reply
-                // Priority: AI's text content > Tool Summary
-                $aiText = $choice['content'] ?? '';
-                $userReply = !empty(trim($aiText)) ? $aiText : $summary;
+                $aiText = '';
+                if (isset($choice['content'])) {
+                    $aiText = $choice['content'];
+                    if ($aiText === null) {
+                         $aiText = '';
+                    }
+                }
                 
-                if (str_starts_with($summary, 'Filling form') && empty(trim($aiText))) {
-                    $userReply = "Filling out the form for you.";
+                $userReply = $summary;
+                if (!empty(trim($aiText))) {
+                    $userReply = $aiText;
+                }
+                
+                if (str_starts_with($summary, 'Filling form')) {
+                    if (empty(trim($aiText))) {
+                         $userReply = "Filling out the form for you.";
+                    }
                 }
 
-                // Smart History: Only store in interactive mode, 100 messages (50 turns)
                 if (session('ablebot_interactive_mode', false)) {
                     $history[] = ['role' => 'user', 'content' => $message];
                     $history[] = ['role' => 'assistant', 'content' => $userReply];
@@ -628,14 +706,18 @@ EOT;
                 }
 
                 return [
-                    'reply' => ucfirst($userReply),  // Clean text for display
+                    'reply' => ucfirst($userReply),     
                     'actions' => $actions,
-                    'voice_summary' => $userReply    // Same clean text for voice
+                    'voice_summary' => $userReply       
                 ];
             } else {
-                $text = $choice['content'] ?? "I didn't understand.";
+                $text = "I didn't understand.";
+                if (isset($choice['content'])) {
+                    if ($choice['content'] !== null) {
+                        $text = $choice['content'];
+                    }
+                }
                 
-                // Smart History: Only store in interactive mode, 100 messages (50 turns)
                 if (session('ablebot_interactive_mode', false)) {
                     $history[] = ['role' => 'user', 'content' => $message];
                     $history[] = ['role' => 'assistant', 'content' => $text];
@@ -655,153 +737,153 @@ EOT;
         }
     }
 
-    //F7 - Farhan Zarif (RBAC-Enhanced Route Map)
-    private function getRouteMap() {
-        $role = auth()->check() ? auth()->user()->role : 'guest';
+    private function getRouteMap(): array
+    {
+        $role = 'guest';
+        $isAuthenticated = auth()->check();
         
-        // Public routes (all roles)
-        $routes = [
-            'home' => url('/'),
-            'login' => url('/login'),
-            'register' => url('/register'),
-            'courses' => url('/courses'),
-            'learning hub' => url('/courses'),
-            'aid directory' => url('/aid'),
-            'jobs' => url('/jobs'),
-            'job search' => url('/jobs'),
-            'admin login' => url('/admin/login'),
-            // OCR & Text Simplification (Accessibility)
-            'upload' => url('/upload'),
-            'ocr' => url('/upload'),
-            'simplify text' => url('/upload'),
-            'text extraction' => url('/upload'),
-        ];
-        
-        // Authenticated routes (all logged-in users)
-        if (auth()->check()) {
-            $routes += [
-                'dashboard' => url('/dashboard'),
-                'profile' => url('/profile'),
-                'edit profile' => url('/profile/edit'),
-                'notifications' => url('/notifications'),
-                'forum' => url('/forum'),
-                'messages' => url('/messages'),
-                'community' => url('/community'),
-                'events' => url('/community/events'),
-                'create event' => url('/community/events/create'),
-                'matrimony' => url('/community/matrimony'),
-            ];
+        if ($isAuthenticated) {
+            $user = auth()->user();
+            $role = $user->role;
         }
         
-        // Disabled Person routes (disabled role only)
+
+        $routes = [];
+        $routes['home'] = url('/');
+        $routes['login'] = url('/login');
+        $routes['register'] = url('/register');
+        $routes['courses'] = url('/courses');
+        $routes['learning hub'] = url('/courses');
+        $routes['aid directory'] = url('/aid');
+        $routes['jobs'] = url('/jobs');
+        $routes['job search'] = url('/jobs');
+        $routes['admin login'] = url('/admin/login');
+        $routes['upload'] = url('/upload');
+        $routes['ocr'] = url('/upload');
+        $routes['simplify text'] = url('/upload');
+        $routes['text extraction'] = url('/upload');
+        
+
+        if ($isAuthenticated) {
+            $routes['dashboard'] = url('/dashboard');
+            $routes['profile'] = url('/profile');
+            $routes['edit profile'] = url('/profile/edit');
+            $routes['notifications'] = url('/notifications');
+            $routes['forum'] = url('/forum');
+            $routes['messages'] = url('/messages');
+            $routes['community'] = url('/community');
+            $routes['events'] = url('/community/events');
+            $routes['create event'] = url('/community/events/create');
+            $routes['matrimony'] = url('/community/matrimony');
+        }
+        
         if ($role === 'disabled') {
-            $routes += [
-                'accessibility settings' => url('/accessibility'),
-                'my applications' => url('/candidate/applications'),
-                'assistance requests' => url('/user/assistance'),
-                'request assistance' => url('/user/assistance/create'),
-                'health dashboard' => url('/health/dashboard'),
-                'my requests' => url('/user/requests'),
-                // F17 - User Appointments
-                'appointments' => url('/user/appointments'),
-                'my appointments' => url('/user/appointments'),
-                'appointment calendar' => url('/user/appointments/calendar'),
-            ];
+            $routes['accessibility settings'] = url('/accessibility');
+            $routes['my applications'] = url('/candidate/applications');
+            $routes['assistance requests'] = url('/user/assistance');
+            $routes['request assistance'] = url('/user/assistance/create');
+            $routes['health dashboard'] = url('/health/dashboard');
+            $routes['my requests'] = url('/user/requests');
+            $routes['appointments'] = url('/user/appointments');
+            $routes['my appointments'] = url('/user/appointments');
+            $routes['appointment calendar'] = url('/user/appointments/calendar');
         }
         
-        // Caregiver routes (caregiver role only)
         if ($role === 'caregiver') {
-            $routes += [
-                'caregiver dashboard' => url('/caregiver/dashboard'),
-                // F17 - Caregiver Appointments Management
-                'manage appointments' => url('/caregiver/appointments'),
-                'doctor appointments' => url('/caregiver/appointments'), 
-                'schedule appointment' => url('/caregiver/appointments'),
-                'caregiver appointment calendar' => url('/caregiver/appointments/calendar'),
-            ];
+            $routes['caregiver dashboard'] = url('/caregiver/dashboard');
+            $routes['manage appointments'] = url('/caregiver/appointments');
+            $routes['doctor appointments'] = url('/caregiver/appointments'); 
+            $routes['schedule appointment'] = url('/caregiver/appointments');
+            $routes['caregiver appointment calendar'] = url('/caregiver/appointments/calendar');
         }
         
-        // Employer routes (employer role only)
         if ($role === 'employer') {
-            $routes += [
-                'employer dashboard' => url('/employer/jobs'),
-                'my jobs' => url('/employer/jobs'),
-                'post a job' => url('/employer/jobs/create'),
-                'employer applications' => url('/employer/applications'),
-                'employer interviews' => url('/employer/interviews'),
-                'company profile' => url('/employer/profile'),
-                'edit company profile' => url('/employer/profile/edit'),
-                'employer reports' => url('/employer/reports'),
-            ];
+            $routes['employer dashboard'] = url('/employer/jobs');
+            $routes['my jobs'] = url('/employer/jobs');
+            $routes['post a job'] = url('/employer/jobs/create');
+            $routes['employer applications'] = url('/employer/applications');
+            $routes['employer interviews'] = url('/employer/interviews');
+            $routes['company profile'] = url('/employer/profile');
+            $routes['edit company profile'] = url('/employer/profile/edit');
+            $routes['employer reports'] = url('/employer/reports');
         }
         
-        // Volunteer routes (volunteer role only)
         if ($role === 'volunteer') {
-            $routes += [
-                'volunteer dashboard' => url('/volunteer/requests'),
-                'help requests' => url('/volunteer/requests'),
-                'volunteer profile' => url('/volunteer/profile'),
-                'edit volunteer profile' => url('/volunteer/profile/edit'),
-                'active assistance' => url('/volunteer/assistance/active'),
-                'active tasks' => url('/volunteer/assistance/active'),
-                'task history' => url('/volunteer/assistance/history'),
-                'assistance history' => url('/volunteer/assistance/history'),
-            ];
+            $routes['volunteer dashboard'] = url('/volunteer/requests');
+            $routes['help requests'] = url('/volunteer/requests');
+            $routes['volunteer profile'] = url('/volunteer/profile');
+            $routes['edit volunteer profile'] = url('/volunteer/profile/edit');
+            $routes['active assistance'] = url('/volunteer/assistance/active');
+            $routes['active tasks'] = url('/volunteer/assistance/active');
+            $routes['task history'] = url('/volunteer/assistance/history');
+            $routes['assistance history'] = url('/volunteer/assistance/history');
         }
         
-        // Admin routes (admin role only)
         if ($role === 'admin') {
-            $routes += [
-                'admin dashboard' => url('/admin/dashboard'),
-                'admin users' => url('/admin/users'),
-                'admin volunteers' => url('/admin/volunteers'),
-                'admin employers' => url('/admin/employers'),
-                'admin caregivers' => url('/admin/caregivers'),
-                'admin jobs' => url('/admin/jobs'),
-                'admin courses' => url('/admin/courses'),
-                'admin aid' => url('/admin/aid'),
-                'admin moderation' => url('/admin/moderation'),
-                'admin community' => url('/admin/community'),
-            ];
+            $routes['admin dashboard'] = url('/admin/dashboard');
+            $routes['admin users'] = url('/admin/users');
+            $routes['admin volunteers'] = url('/admin/volunteers');
+            $routes['admin employers'] = url('/admin/employers');
+            $routes['admin caregivers'] = url('/admin/caregivers');
+            $routes['admin jobs'] = url('/admin/jobs');
+            $routes['admin courses'] = url('/admin/courses');
+            $routes['admin aid'] = url('/admin/aid');
+            $routes['admin moderation'] = url('/admin/moderation');
+            $routes['admin community'] = url('/admin/community');
         }
         
         return $routes;
     }
-    // F21 - AI Certificate Generation
+
     public function generateCertificateMessage(\App\Models\Auth\User $user, \App\Models\Education\Course $course): string
     {
-        if (!$this->apiKey) {
-            return "This certificate recognizes the successful completion of the course {$course->title}.";
+        if ($this->apiKey === '') {
+            $courseTitle = $course->title;
+            return "This certificate recognizes the successful completion of the course {$courseTitle}.";
         }
 
-        $prompt = "Generate a short, professional, and inspiring congratulatory message for {$user->name} for completing the course '{$course->title}'. Focus on the achievement and future potential. Max 2 sentences. Do not use hashtags or emojis.";
+        $userFullName = $user->name;
+        $courseTitle = $course->title;
+        $promptMessage = "Generate a short, professional, and inspiring congratulatory message for {$userFullName} for completing the course '{$courseTitle}'. Focus on the achievement and future potential. Max 2 sentences. Do not use hashtags or emojis.";
 
         try {
-             $response = Http::withOptions(['verify' => false, 'timeout' => 30])
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->apiKey
-                ])
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => 'You are a professional academic assistant.'],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'max_tokens' => 100,
-                    'temperature' => 0.7
-                ]);
+            $httpRequest = Http::withOptions(['verify' => false, 'timeout' => 30]);
+            $httpRequestWithHeaders = $httpRequest->withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->apiKey
+            ]);
+            
+            $requestJson = [
+                'model' => $this->model,
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a professional academic assistant.'],
+                    ['role' => 'user', 'content' => $promptMessage]
+                ],
+                'max_tokens' => 100,
+                'temperature' => 0.7
+            ];
 
-            if ($response->successful()) {
-                return trim($response->json()['choices'][0]['message']['content'] ?? "Congratulations on completing {$course->title}!");
+            $apiResponse = $httpRequestWithHeaders->post($this->apiUrl, $requestJson);
+
+            if ($apiResponse->successful()) {
+                $responseData = $apiResponse->json();
+                $generatedContent = "Congratulations on completing {$courseTitle}!";
+                
+                if (isset($responseData['choices'][0]['message']['content'])) {
+                    $generatedContent = $responseData['choices'][0]['message']['content'];
+                }
+                
+                return trim($generatedContent);
             }
             
-            Log::error("AI Certificate Error: " . $response->body());
+            $responseBody = $apiResponse->body();
+            Log::error("AI Certificate Error: " . $responseBody);
 
         } catch (\Exception $e) {
-            Log::error("AI Certificate Exception: " . $e->getMessage());
+            $errorMsg = $e->getMessage();
+            Log::error("AI Certificate Exception: " . $errorMsg);
         }
 
-        return "Congratulations on successfully completing the course '{$course->title}'. This certificate recognizes your dedication and hard work throughout the curriculum.";
+        return "Congratulations on successfully completing the course '{$courseTitle}'. This certificate recognizes your dedication and hard work throughout the curriculum.";
     }
 }

@@ -1,6 +1,5 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
 
 namespace App\Http\Controllers\Employer;
 
@@ -9,7 +8,6 @@ use App\Models\Employment\EmployerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-//F10 - Employer Job Posting & Dashboard - Company Profile
 class EmployerProfileController extends Controller
 {
     public function show()

@@ -1,5 +1,5 @@
 <?php
-// F5 - Rifat Jahan Roza
+// F5 - Roza Akter
 
 namespace App\Http\Middleware;
 
@@ -10,13 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApplyAccessibilityPreferences
 {
-    /**
-     * Bootstrap the accessibility preferences for the current request.
-     *
-     * This middleware:
-     * - Ensures the authenticated user's accessibility_preferences are stored in session
-     * - Shares them with all Blade views via $accessibilityPreferences
-     */
+
     public function handle(Request $request, Closure $next): Response
     {
         $preferences = [];
@@ -24,7 +18,6 @@ class ApplyAccessibilityPreferences
         if (Auth::check()) {
             $user = Auth::user();
 
-            // ✅ Apply adaptive UI only for disabled users
             if ($user->hasRole(\App\Models\Auth\User::ROLE_DISABLED)) {
                 $preferences = session('accessibility_preferences', []);
 

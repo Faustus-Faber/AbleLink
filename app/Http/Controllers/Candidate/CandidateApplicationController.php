@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employment\JobApplication;
 
-//F9 - Evan Munshi
 class CandidateApplicationController extends Controller
 {
     /**

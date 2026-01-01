@@ -1,4 +1,3 @@
-<!-- //F13 - Farhan Zarif -->
 @extends('layouts.app')
 
 @section('content')
@@ -7,7 +6,6 @@
 
     <div class="bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden">
         <div class="md:flex h-[600px]">
-            <!-- Sidebar / Conversation List -->
             <div class="md:w-1/3 border-r border-slate-100 bg-slate-50 overflow-y-auto">
                 <div class="p-4 border-b border-slate-100 bg-white sticky top-0 z-10 flex justify-between items-center">
                     <h2 class="font-bold text-slate-700">Conversations</h2>
@@ -48,7 +46,6 @@
                 </div>
             </div>
 
-            <!-- Empty State for Index -->
             <div class="hidden md:flex md:w-2/3 flex-col items-center justify-center text-center p-8 bg-white">
                 <div class="w-20 h-20 bg-indigo-50 text-indigo-400 rounded-full flex items-center justify-center mb-6">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
@@ -59,16 +56,11 @@
         </div>
     </div>
 
-    <!-- New Chat Modal -->
     <div id="new-chat-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Backdrop -->
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('new-chat-modal').classList.add('hidden')"></div>
-
-        <!-- Modal Panel -->
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="bg-white rounded-2xl shadow-2xl transform transition-all max-w-md w-full overflow-hidden relative border border-slate-100">
                 
-                <!-- Close Button -->
                 <button onclick="document.getElementById('new-chat-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-full hover:bg-slate-50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -84,11 +76,9 @@
                     <form action="{{ route('messages.store') }}" method="POST" class="space-y-4" id="new-message-form">
                         @csrf
                         
-                        <!-- User Selection -->
                         <div>
                             <label class="block text-xs font-bold text-slate-900 mb-1.5 uppercase tracking-wide">Recipient</label>
                             
-                            <!-- Search Input -->
                             <div class="relative mb-2">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -98,7 +88,6 @@
 
                             <input type="hidden" name="recipient_id" id="recipient_id" required>
 
-                            <!-- User List -->
                             <div class="border border-slate-200 rounded-lg max-h-32 overflow-y-auto custom-scrollbar bg-white" id="user-list">
                                 @forelse($users as $user)
                                     <div class="user-option p-2.5 hover:bg-slate-50 cursor-pointer flex items-center transition-all border-b border-slate-50 last:border-0" onclick="selectUser('{{ $user->id }}', this)">
@@ -109,7 +98,6 @@
                                             <p class="text-sm font-bold text-slate-900 user-name">{{ $user->name }}</p>
                                             <p class="text-[10px] text-slate-500 user-email">{{ $user->email }}</p>
                                         </div>
-                                        <!-- Checkmark -->
                                         <div class="w-5 h-5 rounded-full bg-indigo-500 text-white items-center justify-center hidden check-icon shadow-sm transform scale-0 transition-transform duration-200">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                         </div>
@@ -123,7 +111,6 @@
                             </div>
                         </div>
 
-                        <!-- Message Body -->
                         <div>
                             <label for="body" class="block text-xs font-bold text-slate-900 mb-1.5 uppercase tracking-wide">Message</label>
                             <textarea name="body" id="body" rows="3" class="block w-full rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-sm resize-none" placeholder="Write your message here..." required></textarea>
@@ -139,7 +126,6 @@
                 </div>
                 
                 <script>
-                    // Search Logic
                     document.getElementById('user-search').addEventListener('input', function(e) {
                         const searchTerm = e.target.value.toLowerCase();
                         const users = document.querySelectorAll('.user-option');
@@ -165,11 +151,9 @@
                         }
                     });
 
-                    // Selection Logic
                     function selectUser(id, element) {
                         document.getElementById('recipient_id').value = id;
 
-                        // Visual Reset
                         document.querySelectorAll('.user-option').forEach(el => {
                             el.classList.remove('bg-indigo-50', 'ring-1', 'ring-indigo-500', 'border-indigo-200');
                             const icon = el.querySelector('.check-icon');
@@ -177,23 +161,19 @@
                             icon.classList.remove('flex', 'scale-100');
                         });
                         
-                        // Active State
                         element.classList.add('bg-indigo-50', 'ring-1', 'ring-indigo-500', 'border-indigo-200');
                         const activeIcon = element.querySelector('.check-icon');
                         activeIcon.classList.remove('hidden');
                         activeIcon.classList.add('flex');
                         
-                        // Small timeout to allow display:flex to apply before scaling
                         setTimeout(() => {
                             activeIcon.classList.add('scale-100');
                         }, 10);
                     }
 
-                    // Form Validation logic
                     const newMessageForm = document.getElementById('new-message-form');
                     if (newMessageForm) {
                         newMessageForm.addEventListener('submit', function(e) {
-                            // Ensure validation only runs for this specific form
                             if (!document.getElementById('recipient_id').value) {
                                 e.preventDefault();
                                 alert('Please select a recipient to message.');

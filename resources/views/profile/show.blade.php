@@ -154,12 +154,110 @@
                      </div>
                 </div>
 
-                </div>
+                @if($user->role === \App\Models\Auth\User::ROLE_DISABLED)
+                    {{-- SOS Button Section --}}
+                    <div class="bg-red-600 rounded-[2.5rem] p-10 text-white shadow-xl shadow-red-600/30 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-red-700 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        
+                        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div>
+                                <h3 class="text-3xl font-black mb-2 tracking-tight">Emergency SOS</h3>
+                                <p class="text-red-100 font-medium max-w-sm">One-touch alert to notify your caregiver and admins with your location immediately.</p>
+                            </div>
+
+                            <form id="sos-form" action="{{ route('sos.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="latitude" id="sos-latitude" value="">
+                                <input type="hidden" name="longitude" id="sos-longitude" value="">
+                                <input type="hidden" name="accuracy_m" id="sos-accuracy" value="">
+                                <input type="hidden" name="address" id="sos-address" value="">
+                                <input type="hidden" name="notes" id="sos-notes" value="SOS triggered from profile.">
+                                
+                                <button type="submit" id="sos-button" class="px-10 py-5 bg-white text-red-600 rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center gap-3">
+                                    <svg class="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    SEND SOS
+                                </button>
+                                <p id="sos-status" class="mt-2 text-center text-sm font-bold text-red-200"></p>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
 </div>
-@endsection
+
+@if($user->role === \App\Models\Auth\User::ROLE_DISABLED)
+@if(session('sos_success'))
+<div id="sos-success-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-2xl animate-in fade-in zoom-in duration-300">
+        <div class="w-24 h-24 mx-auto bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+            <svg class="w-12 h-12 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h3 class="text-3xl font-black text-zinc-900 mb-4 tracking-tight">SOS Sent!</h3>
+        <p class="text-zinc-500 mb-8 text-lg font-medium">Your location has been shared with admins and active caregivers.</p>
+        <button onclick="document.getElementById('sos-success-modal').remove()" class="w-full py-4 rounded-xl bg-zinc-900 text-white font-bold hover:bg-black transition-all">
+            Dismiss
+        </button>
+    </div>
+</div>
+@endif
+
+<script>
+(() => {
+  const btn = document.getElementById('sos-button');
+  const form = document.getElementById('sos-form');
+  const status = document.getElementById('sos-status');
+  if (!btn || !form) return;
+
+  let hasSubmitted = false;
+  const setStatus = (text) => { if (status) status.textContent = text || ''; };
+
+  const submitWith = (coords) => {
+    const lat = document.getElementById('sos-latitude');
+    const lng = document.getElementById('sos-longitude');
+    const acc = document.getElementById('sos-accuracy');
+    
+    if (coords) {
+      lat.value = coords.latitude;
+      lng.value = coords.longitude;
+      acc.value = coords.accuracy ? Math.round(coords.accuracy) : '';
+    }
+
+    hasSubmitted = true;
+    form.submit();
+  };
+
+  form.addEventListener('submit', (e) => {
+    if (hasSubmitted) return;
+    e.preventDefault();
+
+    btn.disabled = true;
+    btn.classList.add('opacity-80');
+    setStatus('Locating...');
+
+    if (!navigator.geolocation) {
+      setStatus('No GPS. Sending anyway...');
+      submitWith(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setStatus('Found. Sending...');
+        submitWith(pos.coords);
+      },
+      (err) => {
+        setStatus('GPS failed. Sending anyway...');
+        submitWith(null);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+})();
+</script>
+@endif
 
 @endsection
 

@@ -1,6 +1,6 @@
 <?php
 
-// F17 - Rifat Jahan Roza
+// F17 - Roza Akter
 namespace App\Notifications\Health;
 
 use App\Models\Health\DoctorAppointment;
@@ -14,11 +14,9 @@ class AppointmentReminder extends Notification
     use Queueable;
 
     public $appointment;
-    public $reminderType; // '24h', '1h', '30m'
+    public $reminderType; 
 
-    /**
-     * Create a new notification instance.
-     */
+
     public function __construct(DoctorAppointment $appointment, string $reminderType = '24h')
     {
         $this->appointment = $appointment;

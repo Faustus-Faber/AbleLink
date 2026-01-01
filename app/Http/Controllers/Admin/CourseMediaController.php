@@ -1,7 +1,4 @@
 <?php
-//F11 - Akida Lisi
-
-//Akida - F11
 
 namespace App\Http\Controllers\Admin;
 
@@ -14,6 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
+/**
+ * Manage media for courses.
+ */
 class CourseMediaController extends Controller
 {
     public function create(Course $course): View
