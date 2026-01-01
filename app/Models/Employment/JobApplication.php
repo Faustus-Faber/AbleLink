@@ -1,6 +1,6 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
+
 
 namespace App\Models\Employment;
 
@@ -9,7 +9,6 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-//F10 - Employer Job Posting & Dashboard
 class JobApplication extends Model
 {
     use HasFactory;

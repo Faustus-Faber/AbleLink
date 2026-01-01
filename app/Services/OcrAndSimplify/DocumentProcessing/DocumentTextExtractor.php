@@ -21,13 +21,11 @@ final class DocumentTextExtractor
 
         $warnings = [];
 
-        // Plain text
         if ($extension === 'txt' || str_starts_with($mime, 'text/')) {
             $contents = @file_get_contents($path);
             return new ExtractionResult($contents === false ? '' : $contents, $contents === false ? ['Could not read the text file.'] : []);
         }
 
-        // PDF (text-based)
         if ($extension === 'pdf' || $mime === 'application/pdf') {
             try {
                 $parser = new \Smalot\PdfParser\Parser();
@@ -44,7 +42,6 @@ final class DocumentTextExtractor
             }
         }
 
-        // Images -> OCR
         $isImage = in_array($extension, ['jpg', 'jpeg', 'png'], true) || str_starts_with($mime, 'image/');
         if ($isImage) {
             if (!$this->ocr->isAvailable()) {

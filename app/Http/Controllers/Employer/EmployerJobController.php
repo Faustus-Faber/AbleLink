@@ -1,6 +1,6 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
+
 
 namespace App\Http\Controllers\Employer;
 
@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\Employment\ApplicationStatusChanged;
 
-//F10 - Employer Job Posting & Dashboard
 class EmployerJobController extends Controller
 {
 
@@ -230,8 +229,6 @@ class EmployerJobController extends Controller
 
         $application->update($validated);
 
-        //F9 - Evan Munshi
-        // Notify the applicant
         $application->applicant->notify(new ApplicationStatusChanged($application));
         //F9 - Evan Munshi
 

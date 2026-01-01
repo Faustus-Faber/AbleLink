@@ -7,7 +7,7 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-//F14 - Volunteer Matching System
+//F14 - Roza Akter
 class AssistanceRequest extends Model
 {
     use HasFactory;

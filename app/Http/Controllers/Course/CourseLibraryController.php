@@ -17,7 +17,6 @@ class CourseLibraryController extends Controller
         $courses = collect();
 
         try {
-            // If migrations haven't been run yet, avoid a 500 and show an empty library.
             if (Schema::hasTable('courses')) {
                 $query = Course::query()
                     ->published()
@@ -45,7 +44,6 @@ class CourseLibraryController extends Controller
 
     public function show(Course $course): View
     {
-        // Public-facing library only shows published courses.
         abort_unless($course->published_at && $course->published_at->isPast(), 404);
 
         $course->load(['media']);

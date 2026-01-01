@@ -16,7 +16,6 @@ class JobController extends Controller
      */
     public function index(Request $request)
     {
-        //F9 - Evan Munshi
         $query = Job::where('status', 'active');
 
         if ($request->filled('search')) {
@@ -32,7 +31,6 @@ class JobController extends Controller
             $query->where('job_type', $request->job_type);
         }
 
-        // Accessibility Filters
         if ($request->has('wheelchair_accessible')) {
             $query->where('wheelchair_accessible', true);
         }
@@ -81,7 +79,6 @@ class JobController extends Controller
 
         $user = Auth::user();
 
-        // Check if already applied
         if ($job->applications()->where('applicant_id', $user->id)->exists()) {
             return back()->with('error', 'You have already applied for this job.');
         }

@@ -1,6 +1,4 @@
 <?php
-//F11 - Akida Lisi
-// Akida - F11
 
 namespace App\Http\Controllers\Admin;
 
@@ -13,6 +11,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
+/**
+ * Manage courses.
+ */
 class CourseController extends Controller
 {
     public function index(): View

@@ -5,23 +5,37 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Community\ForumThread;
 use App\Models\Community\ForumReply;
+use App\Models\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Handle content moderation and user bans.
+ */
 class AdminModerationController extends Controller
 {
     public function index(): View
     {
-        $flaggedThreads = ForumThread::where('status', 'flagged')->latest()->get();
-        // Since replies are separate, we might want to fetch them too.
-        // Assuming ForumReply model has a status column as well based on previous context.
-        $flaggedReplies = ForumReply::where('status', 'flagged')->with('thread')->latest()->get();
-        
-        // Fetch banned users for management list
-        $bannedUsers = \App\Models\Auth\User::whereNotNull('banned_at')->latest('banned_at')->get();
+        $flaggedThreadsQuery = ForumThread::where('status', 'flagged');
+        $flaggedThreadsQuery->latest();
+        $flaggedThreadsList = $flaggedThreadsQuery->get();
 
-        return view('admin.moderation.index', compact('flaggedThreads', 'flaggedReplies', 'bannedUsers'));
+        $flaggedRepliesQuery = ForumReply::where('status', 'flagged');
+        $flaggedRepliesQuery->with('thread');
+        $flaggedRepliesQuery->latest();
+        $flaggedRepliesList = $flaggedRepliesQuery->get();
+        
+        $bannedUsersQuery = User::whereNotNull('banned_at');
+        $bannedUsersQuery->latest('banned_at');
+        $bannedUsersList = $bannedUsersQuery->get();
+
+        return view('admin.moderation.index', [
+            'flaggedThreads' => $flaggedThreadsList,
+            'flaggedReplies' => $flaggedRepliesList,
+            'bannedUsers' => $bannedUsersList
+        ]);
     }
 
     public function approveThread(ForumThread $thread): RedirectResponse
@@ -48,13 +62,13 @@ class AdminModerationController extends Controller
         return back()->with('success', 'Reply deleted.');
     }
 
-    public function banUser(\App\Models\Auth\User $user): RedirectResponse
+    public function banUser(User $user): RedirectResponse
     {
         $user->update(['banned_at' => now()]);
         return back()->with('success', "User {$user->name} has been banned.");
     }
 
-    public function unbanUser(\App\Models\Auth\User $user): RedirectResponse
+    public function unbanUser(User $user): RedirectResponse
     {
         $user->update(['banned_at' => null]);
         return back()->with('success', "User {$user->name} has been unbanned.");

@@ -1,4 +1,3 @@
-{{-- F15 - Akida Lisi --}}
 <x-mail::message>
 # Emergency SOS Alert
 

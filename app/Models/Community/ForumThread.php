@@ -1,12 +1,12 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Models\Community;
 
 use App\Models\Auth\User;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ForumThread extends Model
 {
@@ -21,12 +21,12 @@ class ForumThread extends Model
         'flag_reason',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function replies()
+    public function replies(): HasMany
     {
         return $this->hasMany(ForumReply::class);
     }

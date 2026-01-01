@@ -9,21 +9,29 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckBanned
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $incomingRequest, Closure $nextMiddleware): Response
     {
-        if (Auth::check() && Auth::user()->isBanned()) {
-            if ($request->routeIs('banned')) {
-                return $next($request);
-            }
+        $isAuthenticated = Auth::check();
+
+        if ($isAuthenticated === true) {
+            $currentUser = Auth::user();
             
-            return redirect()->route('banned');
+            if ($currentUser !== null) {
+                $isBanned = $currentUser->isBanned();
+
+                if ($isBanned === true) {
+                    $isOnBannedRoute = $incomingRequest->routeIs('banned');
+
+                    if ($isOnBannedRoute === true) {
+                        return $nextMiddleware($incomingRequest);
+                    }
+                    
+                    $redirector = redirect();
+                    return $redirector->route('banned');
+                }
+            }
         }
 
-        return $next($request);
+        return $nextMiddleware($incomingRequest);
     }
 }

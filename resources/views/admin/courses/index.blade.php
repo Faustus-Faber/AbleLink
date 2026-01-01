@@ -75,5 +75,3 @@
     </div>
 </div>
 @endsection
-
-{{-- F11 - Akida Lisi --}}

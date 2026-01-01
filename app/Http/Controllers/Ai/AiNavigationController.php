@@ -21,7 +21,7 @@ class AiNavigationController extends Controller
     public function chat(Request $request): JsonResponse
     {
         try {
-            $request->validate([
+            $validatedData = $request->validate([
                 'message' => 'required|string|max:500',
                 'current_url' => 'required|string',
             ]);
@@ -30,51 +30,71 @@ class AiNavigationController extends Controller
             $currentUrl = $request->input('current_url');
             $pageStructure = $request->input('page_structure');
 
-            $response = $this->aiService->processMessage($message, $currentUrl, $pageStructure);
+            $responseData = $this->aiService->processMessage($message, $currentUrl, $pageStructure);
 
-            return response()->json($response);
-        } catch (\Throwable $e) {
+            $jsonResponse = response()->json($responseData);
+            
+            return $jsonResponse;
+        } 
+        catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("AiNavigationController Error: " . $e->getMessage());
-            return response()->json([
+            
+            $errorPayload = [
                 'reply' => "System Error: " . $e->getMessage(),
                 'action' => 'none',
                 'voice_summary' => "System error occurred."
-            ], 500);
+            ];
+            $errorResponse = response()->json($errorPayload, 500);
+
+            return $errorResponse;
         }
     }
 
     //F18 - Farhan Zarif
     public function upload(Request $request): JsonResponse
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,txt'
         ]);
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $filename = $file->hashName(); // Storing as hash to prevent collision
-            $file->storeAs('chat_uploads', $filename, 'public');
+        $hasFile = $request->hasFile('file');
+        
+        if ($hasFile === true) {
+            $uploadedFile = $request->file('file');
+            $generatedFilename = $uploadedFile->hashName(); 
+            $uploadedFile->storeAs('chat_uploads', $generatedFilename, 'public');
             
-            // Return PROXY URL to bypass symlink issues
-            return response()->json([
-                'url' => route('ai.file', ['filename' => $filename]), // Use proxy route
-                'filename' => $file->getClientOriginalName()
-            ]);
+            $routeParams = ['filename' => $generatedFilename];
+            $proxyUrl = route('ai.file', $routeParams);
+            $originalName = $uploadedFile->getClientOriginalName();
+
+            $successPayload = [
+                'url' => $proxyUrl, 
+                'filename' => $originalName
+            ];
+            
+            $jsonResponse = response()->json($successPayload);
+            
+            return $jsonResponse;
         }
 
-        return response()->json(['error' => 'No file uploaded'], 400);
+        $errorPayload = ['error' => 'No file uploaded'];
+        $errorResponse = response()->json($errorPayload, 400);
+
+        return $errorResponse;
     }
 
-    public function serveFile(string $filename)
+    public function serveFile(string $filename): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
-        $path = storage_path("app/public/chat_uploads/{$filename}");
-        if (!file_exists($path)) {
+        $filePath = storage_path("app/public/chat_uploads/{$filename}");
+        $fileExists = file_exists($filePath);
+        
+        if ($fileExists === false) {
             abort(404);
         }
         
-        // Determine MIME type from extension for proper file handling
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $mimeTypes = [
+        $fileExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supportedMimeTypes = [
             'jpg' => 'image/jpeg',
             'jpeg' => 'image/jpeg',
             'png' => 'image/png',
@@ -83,8 +103,17 @@ class AiNavigationController extends Controller
             'doc' => 'application/msword',
             'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
-        $mimeType = $mimeTypes[$ext] ?? mime_content_type($path);
         
-        return response()->file($path, ['Content-Type' => $mimeType]);
+        if (array_key_exists($fileExtension, $supportedMimeTypes)) {
+            $determinedMimeType = $supportedMimeTypes[$fileExtension];
+        } 
+        else {
+            $determinedMimeType = mime_content_type($filePath);
+        }
+        
+        $responseHeaders = ['Content-Type' => $determinedMimeType];
+        $fileResponse = response()->file($filePath, $responseHeaders);
+        
+        return $fileResponse;
     }
 }

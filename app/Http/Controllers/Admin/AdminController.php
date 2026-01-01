@@ -8,12 +8,15 @@ use App\Models\Auth\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; // Assuming this might be needed or just preserving
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Schema; // F15 - Akida Lisi
-use Illuminate\Support\Facades\DB; // F20 - Akida Lisi
-use App\Models\Emergency\EmergencySosEvent; // F15 - Akida Lisi
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use App\Models\Emergency\EmergencySosEvent;
 
+/**
+ * Main admin dashboard and authentication controller.
+ */
 class AdminController extends Controller
 {
     public function showLogin(): View
@@ -66,7 +69,6 @@ class AdminController extends Controller
                 ->get();
         }
 
-        // F20 - Akida Lisi
         $aidProgramsCount = 0;
         if (Schema::hasTable('aid_programs')) {
             $aidProgramsCount = DB::table('aid_programs')->count();
@@ -79,7 +81,7 @@ class AdminController extends Controller
         $statsUser = [
             'new_today' => User::whereDate('created_at', $today)->count(),
             'active_30d' => User::where('updated_at', '>=', now()->subDays(30))->count(),
-            'blocked' => 0, // Placeholder as ban logic varies
+            'blocked' => 0,
         ];
 
         // Job Platform

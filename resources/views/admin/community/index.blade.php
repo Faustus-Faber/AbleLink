@@ -7,7 +7,6 @@
             <p class="text-slate-500 font-medium text-xs uppercase tracking-wide">Manage Forum Threads</p>
         </div>
 
-        <!-- Search Bar -->
         <form action="{{ route('admin.community.index') }}" method="GET" class="w-full md:w-96">
             <div class="relative">
                 <input type="text" name="search" value="{{ request('search') }}" 
@@ -67,13 +66,11 @@
                                 </td>
                                 <td class="p-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <!-- Read Button (Link to Public) -->
                                         <a href="{{ route('forum.show', $thread) }}" target="_blank"
                                            class="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-bold text-xs" title="View Thread">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                         </a>
 
-                                        <!-- Delete Button -->
                                         <form action="{{ route('admin.community.threads.destroy', $thread) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this thread? This action cannot be undone.');">
                                             @csrf
                                             @method('DELETE')

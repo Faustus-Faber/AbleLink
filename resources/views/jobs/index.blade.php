@@ -1,10 +1,8 @@
 @extends('layouts.app')
 
-{{-- F9 - Evan Yuvraj Munshi --}}
 @section('content')
 <div class="min-h-screen bg-zinc-50 py-12">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-4">
             <div>
                 <h1 class="text-4xl font-extrabold text-blue-900 tracking-tight">Find Your Dream Job</h1>
@@ -19,7 +17,6 @@
                     </a>
                 @endauth
 
-                {{-- F12 - Modal Trigger --}}
                 <button @click="$dispatch('open-recommendations', { type: 'job' })" 
                     class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -28,10 +25,8 @@
             </div>
         </div>
         
-        {{-- F12 - Modal Component --}}
         <x-recommendation-modal type="job" />
 
-        {{-- Search & Filters --}}
         <div class="mb-10 bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
             <form action="{{ route('jobs.index') }}" method="GET" class="p-8">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
@@ -73,7 +68,6 @@
                             $currentLabel = $jobTypes[$currentType] ?? 'All Types';
                         @endphp
                         
-                        {{-- Hybrid Dropdown: Hidden native select (for AI) + Premium visual dropdown --}}
                         <div x-data="{ 
                             open: false, 
                             selected: '{{ $currentType }}',
@@ -102,14 +96,12 @@
                             }
                         }" @click.away="open = false" class="relative">
                             
-                            {{-- Hidden Native Select (AI-Compatible) --}}
                             <select name="job_type" id="job_type" class="sr-only" tabindex="-1" aria-hidden="true">
                                 @foreach($jobTypes as $value => $lbl)
                                     <option value="{{ $value }}" {{ $currentType == $value ? 'selected' : '' }}>{{ $lbl }}</option>
                                 @endforeach
                             </select>
 
-                            {{-- Premium Visual Dropdown Trigger --}}
                             <button type="button" @click="open = !open" 
                                 class="relative w-full rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-left text-slate-900 font-medium shadow-sm transition-all duration-200
                                        hover:border-blue-300 hover:shadow-md
@@ -122,7 +114,6 @@
                                 </span>
                             </button>
 
-                            {{-- Premium Dropdown Menu --}}
                             <div x-show="open" 
                                 x-transition:enter="transition ease-out duration-100"
                                 x-transition:enter-start="transform opacity-0 scale-95"
@@ -182,20 +173,8 @@
                     </button>
                 </div>
             </form>
-            
-            <!-- F12 - Smart Recommendations Trigger -->
-            <div class="mt-4 flex justify-end">
-                <button @click="$dispatch('open-recommendation-modal', { type: 'jobs' })" 
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-200">
-                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span>Smart Recommendations</span>
-                </button>
-            </div>
         </div>
 
-        {{-- Job Listings --}}
         @if ($jobs->count() > 0)
             <div class="grid grid-cols-1 gap-6">
                 @foreach ($jobs as $job)

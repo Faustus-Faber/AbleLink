@@ -1,12 +1,12 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Models\Community;
 
 use App\Models\Auth\User;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Conversation extends Model
 {
@@ -17,17 +17,17 @@ class Conversation extends Model
         'user_two_id',
     ];
 
-    public function userOne()
+    public function userOne(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_one_id');
     }
 
-    public function userTwo()
+    public function userTwo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_two_id');
     }
 
-    public function messages()
+    public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
     }

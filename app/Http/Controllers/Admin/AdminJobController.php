@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Employment\Job;
 use Illuminate\Http\Request;
 
+/**
+ * Manage job postings.
+ */
 class AdminJobController extends Controller
 {
     /**
@@ -22,7 +25,7 @@ class AdminJobController extends Controller
                   ->orWhere('location', 'like', "%{$search}%")
                   ->orWhereHas('employer', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%"); // Assuming User model has email
+                        ->orWhere('email', 'like', "%{$search}%");
                   });
             });
         }

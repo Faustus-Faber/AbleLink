@@ -1,10 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- F9 - Evan Yuvraj Munshi --}}
 <div class="min-h-screen bg-zinc-50 py-12">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        {{-- Header --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-4">
             <div>
                 <h1 class="text-4xl font-extrabold text-blue-900 tracking-tight">My Applications</h1>

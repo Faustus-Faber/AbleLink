@@ -1,117 +1,146 @@
 <?php
 
-//F13 - Farhan Zarif
 namespace App\Services\Ai;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\Response;
 
 class AiModerationService
 {
-    /**
-     * Analyze content for moderation.
-     * Returns true if safe, false if flagged.
-     *
-     * @param string $text
-     * @return bool
-     */
     private string $apiKey;
     private string $apiUrl;
-    private string $model;
+    private string $modelName;
 
     public function __construct()
     {
         $this->apiKey = trim(env('AI_API_KEY', ''));
         $this->apiUrl = trim(env('AI_API_URL', ''));
-        $this->model = trim(env('AI_MODEL', 'openai-gpt-oss-120b'));
+        $this->modelName = trim(env('AI_MODEL', 'openai-gpt-oss-120b'));
     }
 
-    /**
-     * Analyze content for moderation using AI API.
-     * Returns true if safe, false if flagged.
-     *
-     * @param string $text
-     * @return bool
-     */
-    public function isSafe(string $text): bool
+    public function isSafe(string $textContent): bool
     {
-        if (!$this->apiKey) {
-            // Fallback for development if no key provided
-            return true;
+        $hasApiKey = $this->apiKey !== '';
+
+        if ($hasApiKey === false) {
+             return true;
         }
 
         try {
-            $response = $this->callAi($text);
-            return $response['safe'] ?? true;
-        } catch (\Exception $e) {
-            // Log error and fail open (allow content) or closed (block) depending on policy.
-            \Illuminate\Support\Facades\Log::error("AI Moderation Error: " . $e->getMessage());
+            $analysisResult = $this->callAiApi($textContent);
+            $isSafe = $analysisResult['safe'];
+            
+            if ($isSafe === null) {
+                return true;
+            }
+            
+            return $isSafe;
+        } catch (\Exception $exception) {
+            $errorMessage = $exception->getMessage();
+            Log::error('AI Moderation Error: ' . $errorMessage);
             return true;
         }
     }
 
-    /**
-     * Get reasoning for flagging.
-     */
-    public function getFlagReason(string $text): string
+    public function getFlagReason(string $textContent): string
     {
-        if (!$this->apiKey) {
-            return "";
-        }
-
-        try {
-            $response = $this->callAi($text);
-            return $response['safe'] ? "" : ($response['reason'] ?? "Content flagged by AI.");
-        } catch (\Exception $e) {
-            return "";
-        }
-    }
-
-    private function callAi(string $text): array
-    {
-        $systemPrompt = <<<EOT
-You are a Content Safety Moderator for a community platform.
-Analyze the following user input text.
-Determine if it contains:
-- Hate speech
-- Encouragement of violence or self-harm
-- Excessive harassment or bullying
-- Explicit sexual content
-
-If it contains any of these, mark it as unsafe.
-Otherwise, mark it as safe.
-
-Return ONLY raw JSON.
-Schema:
-{
-    "safe": boolean,
-    "reason": "string (Short user-facing explanation if unsafe, e.g., 'Hate speech detected', otherwise empty)"
-}
-EOT;
-
-        $response = \Illuminate\Support\Facades\Http::withOptions([
-            'verify' => false,
-            'timeout' => 30,
-        ])->withHeaders([
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->apiKey
-        ])->post($this->apiUrl, [
-            'model' => $this->model,
-            'messages' => [
-                ['role' => 'system', 'content' => $systemPrompt],
-                ['role' => 'user', 'content' => $text]
-            ],
-            'response_format' => ['type' => 'json_object'] // Attempt to force JSON if supported
-        ]);
-
-        if ($response->failed()) {
-            throw new \Exception("API Request failed: " . $response->status() . " Body: " . $response->limit(100));
-        }
-
-        $data = $response->json();
-        $rawContent = $data['choices'][0]['message']['content'] ?? '{}';
+        $hasApiKey = $this->apiKey !== '';
         
-        // Clean markdown code blocks if present (common with some models)
-        $rawContent = preg_replace('/^```json\s*|\s*```$/', '', trim($rawContent));
+        if ($hasApiKey === false) {
+            return '';
+        }
 
-        $decoded = json_decode($rawContent, true);
-        return $decoded ?? ['safe' => true];
+        try {
+            $analysisResult = $this->callAiApi($textContent);
+            $isSafe = $analysisResult['safe'];
+            
+            if ($isSafe === true) {
+                return '';
+            }
+
+            $reason = $analysisResult['reason'];
+            if ($reason !== null) {
+                return $reason;
+            }
+
+            return 'Content flagged by AI.';
+        } catch (\Exception $exception) {
+            return '';
+        }
+    }
+
+    private function callAiApi(string $textContent): array
+    {
+        $systemPrompt = 'You are a Content Safety Moderator for a community platform. ';
+        $systemPrompt .= 'Analyze the following user input text. ';
+        $systemPrompt .= 'Determine if it contains: ';
+        $systemPrompt .= '- Hate speech ';
+        $systemPrompt .= '- Encouragement of violence or self-harm ';
+        $systemPrompt .= '- Excessive harassment or bullying ';
+        $systemPrompt .= '- Explicit sexual content ';
+        $systemPrompt .= 'If it contains any of these, mark it as unsafe. ';
+        $systemPrompt .= 'Otherwise, mark it as safe. ';
+        $systemPrompt .= 'Return ONLY raw JSON. ';
+        $systemPrompt .= 'Schema: { "safe": boolean, "reason": "string (Short user-facing explanation if unsafe, e.g., \'Hate speech detected\', otherwise empty)" }';
+
+        $requestOptions = [];
+        $requestOptions['verify'] = false;
+        $requestOptions['timeout'] = 30;
+
+        $requestHeaders = [];
+        $requestHeaders['Content-Type'] = 'application/json';
+        $requestHeaders['Authorization'] = 'Bearer ' . $this->apiKey;
+
+        $requestPayload = [];
+        $requestPayload['model'] = $this->modelName;
+        
+        $messagesList = [];
+        
+        $systemMessage = [];
+        $systemMessage['role'] = 'system';
+        $systemMessage['content'] = $systemPrompt;
+        $messagesList[] = $systemMessage;
+        
+        $userMessage = [];
+        $userMessage['role'] = 'user';
+        $userMessage['content'] = $textContent;
+        $messagesList[] = $userMessage;
+
+        $requestPayload['messages'] = $messagesList;
+        $requestPayload['response_format'] = ['type' => 'json_object'];
+
+        $httpClient = Http::withOptions($requestOptions);
+        $httpClient->withHeaders($requestHeaders);
+        
+        $apiResponse = $httpClient->post($this->apiUrl, $requestPayload);
+
+        $requestFailed = $apiResponse->failed();
+        if ($requestFailed === true) {
+            $statusCode = $apiResponse->status();
+            $responseBody = $apiResponse->limit(100);
+            throw new \Exception('API Request failed: ' . $statusCode . ' Body: ' . $responseBody);
+        }
+
+        $responseData = $apiResponse->json();
+        
+        $choices = $responseData['choices'];
+        $firstChoice = $choices[0];
+        $messageContent = $firstChoice['message'];
+        $rawContent = $messageContent['content'];
+
+        if ($rawContent === null) {
+            $rawContent = '{}';
+        }
+
+        $cleanedContent = preg_replace('/^```json\s*|\s*```$/', '', trim($rawContent));
+
+        $decodedJson = json_decode($cleanedContent, true);
+
+        if ($decodedJson === null) {
+            return ['safe' => true];
+        }
+
+        return $decodedJson;
     }
 }

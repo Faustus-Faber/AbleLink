@@ -15,36 +15,22 @@ class ApplicationStatusChanged extends Notification
 
     public $application;
 
-    /**
-     * Create a new notification instance.
-     */
+
     public function __construct(JobApplication $application)
     {
         $this->application = $application;
     }
 
     /**
-     * Get the notification's delivery channels.
      *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        // For now, we'll just use database if available, or mail if configured. 
-        // Given the environment, database notification is safer for demonstration if 'database' channel is set up.
-        // But the prompt says "employee should get notified", which usually implies a visible notification.
-        // I'll use 'database' so it can be shown in a notification center, and 'mail' as backup.
-        // Checking if database driver is set up... The migration for notifications table might not exist.
-        // I see 'create_notifications_table' is standard in Laravel but I didn't check for it.
-        // I'll stick to 'mail' as generated, and add 'database' if I can confirm table exists.
-        // Actually, user just said "get notified". I'll stick to mail for now as it's standard, 
-        // but since I can't easily check mail in this env, I'll add array/database support if I can.
-        // Let's just return ['mail', 'database'] and assume the table exists or will be created.
         return ['database']; 
     }
 
     /**
-     * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
     {
@@ -60,7 +46,6 @@ class ApplicationStatusChanged extends Notification
     }
 
     /**
-     * Get the array representation of the notification.
      *
      * @return array<string, mixed>
      */

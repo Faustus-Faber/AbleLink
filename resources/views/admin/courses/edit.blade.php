@@ -3,7 +3,6 @@
 @section('admin-content')
 
 <div class="max-w-6xl mx-auto">
-    <!-- Header Section -->
     <div class="flex items-center justify-between mb-10">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Edit Course</h1>
@@ -30,7 +29,6 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- Main Form Column -->
         <div class="lg:col-span-2 space-y-8">
             <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10">
                 <form method="POST" action="{{ route('admin.courses.update', $course) }}">
@@ -48,7 +46,6 @@
                     @endif
 
                     <div class="space-y-8">
-                        <!-- Title & Slug -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Title</label>
@@ -62,21 +59,18 @@
                             </div>
                         </div>
 
-                        <!-- Summary -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Summary</label>
                             <input name="summary" value="{{ old('summary', $course->summary) }}"
                                    class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-slate-300 focus:ring-4 focus:ring-slate-100 rounded-xl px-4 py-3 font-medium text-slate-900 transition-all" />
                         </div>
 
-                        <!-- Description -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Description</label>
                             <textarea name="description" rows="8" placeholder="Markdown supported..."
                                       class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-slate-300 focus:ring-4 focus:ring-slate-100 rounded-xl px-4 py-3 font-medium text-slate-900 transition-all resize-y">{{ old('description', $course->description) }}</textarea>
                         </div>
 
-                        <!-- Level & Meta -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Level</label>
@@ -97,7 +91,6 @@
                             </div>
                         </div>
 
-                        <!-- Status -->
                         <div class="flex items-center gap-4 bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <div class="flex items-center h-5">
                                 <input id="published" name="published" type="checkbox" value="1"
@@ -145,7 +138,6 @@
             </div>
         </div>
 
-        <!-- Media Sidebar -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6 sticky top-6">
                 <div class="flex items-center justify-between mb-6">

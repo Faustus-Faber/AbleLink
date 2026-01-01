@@ -11,13 +11,61 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Emergency\EmergencySosEvent; 
 use App\Models\Auth\UserProfile;
-
+use App\Models\Health\MedicationSchedule;
+use App\Models\Health\HealthGoal;
 
 
 class CaregiverController extends Controller
 {
+    // F19 - Evan Yuvraj Munshi
+    public function manageHealth(User $user)
+    {
+        $caregiver = Auth::user();
 
+        $isLinked = $caregiver->patients()
+                            ->where('user_id', $user->id)
+                            ->wherePivot('status', 'active')
+                            ->exists();
 
+        if (!$isLinked) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (!$user->profile) {
+            $user->profile()->create([]);
+        }
+
+        $medications = MedicationSchedule::where('user_id', $user->id)->where('is_active', true)->get();
+        $goals = HealthGoal::where('user_id', $user->id)->where('status', 'active')->get();
+
+        return view('health.caregiver.manage', compact('user', 'medications', 'goals'));
+    }
+
+    public function updateDiagnosis(Request $request, User $user)
+    {
+        $caregiver = Auth::user();
+
+        $isLinked = $caregiver->patients()
+                            ->where('user_id', $user->id)
+                            ->wherePivot('status', 'active')
+                            ->exists();
+
+        if (!$isLinked) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'diagnosis' => 'nullable|string|max:1000',
+            'medical_history' => 'nullable|string|max:5000',
+        ]);
+
+        $user->profile()->update([
+            'diagnosis' => $validated['diagnosis'],
+            'medical_history' => $validated['medical_history'],
+        ]);
+
+        return redirect()->back()->with('success', 'Health profile updated successfully.');
+    }
 
     //F4 - Farhan Zarif
     public function index()
@@ -40,7 +88,30 @@ class CaregiverController extends Controller
             }
         }
 
-        return view('caregiver.dashboard', compact('patients', 'pendingRequestsCount'));
+        // F15 - Akida Lisi
+        $activePatientIds = $caregiver->patients()
+            ->wherePivot('status', 'active')
+            ->pluck('users.id')
+            ->all();
+
+        $sosAlerts = empty($activePatientIds)
+            ? collect()
+            : (Schema::hasTable('emergency_sos_events') ? EmergencySosEvent::query()
+                ->whereNull('resolved_at')
+                ->whereIn('user_id', $activePatientIds)
+                ->with(['user.profile'])
+                ->latest()
+                ->take(10)
+                ->get() : collect());
+
+        // F17 - Roza Akter
+        $appointmentsCount = empty($activePatientIds)
+            ? 0
+            : (Schema::hasTable('doctor_appointments') ? \App\Models\Health\DoctorAppointment::whereIn('user_id', $activePatientIds)
+                ->where('status', 'scheduled')
+                ->count() : 0);
+
+        return view('caregiver.dashboard', compact('patients', 'sosAlerts', 'pendingRequestsCount', 'appointmentsCount'));
     }
 
     //F4 - Farhan Zarif
@@ -204,7 +275,6 @@ class CaregiverController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link to the patient who triggered SOS
         $isLinked = $caregiver->patients()
                             ->where('user_id', $event->user_id)
                             ->wherePivot('status', 'active')

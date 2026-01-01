@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('admin-content')
-<!-- F20 - Akida Lisi -->
 @php
     $isEdit = ($mode ?? 'create') === 'edit';
     $p = $program;

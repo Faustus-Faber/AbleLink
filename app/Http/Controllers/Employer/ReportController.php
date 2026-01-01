@@ -1,6 +1,5 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
 
 namespace App\Http\Controllers\Employer;
 
@@ -22,7 +21,6 @@ class ReportController extends Controller
             abort(403, 'Only employers can access this page.');
         }
 
-        // Statistics
         $totalJobs = Job::where('employer_id', $employer->id)->count();
         $activeJobs = Job::where('employer_id', $employer->id)->where('status', 'active')->count();
         $totalApplications = JobApplication::whereHas('job', function ($query) use ($employer) {

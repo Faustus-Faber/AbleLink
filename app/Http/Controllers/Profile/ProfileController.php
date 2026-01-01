@@ -42,7 +42,6 @@ class ProfileController extends Controller
             'has_avatar' => $request->hasFile('avatar'),
         ]);
 
-        // Build validation rules dynamically
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
@@ -55,9 +54,8 @@ class ProfileController extends Controller
             'emergency_contact_phone' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|max:20',
         ];
 
-        // Only validate avatar if a file was actually uploaded
         if ($request->hasFile('avatar')) {
-            $rules['avatar'] = 'image|mimes:jpeg,png,jpg,gif|max:51200'; // 50MB
+            $rules['avatar'] = 'image|mimes:jpeg,png,jpg,gif|max:51200'; 
         }
 
         $validated = $request->validate($rules);
@@ -65,7 +63,7 @@ class ProfileController extends Controller
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone_number'] ?? $user->phone, // Keep F1 phone in sync
+            'phone' => $validated['phone_number'] ?? $user->phone, 
         ]);
 
         $profile = $user->profile ?? new \App\Models\Auth\UserProfile(['user_id' => $user->id]);
@@ -78,7 +76,6 @@ class ProfileController extends Controller
         $profile->emergency_contact_name = $validated['emergency_contact_name'] ?? null;
         $profile->emergency_contact_phone = $validated['emergency_contact_phone'] ?? null;
         
-        // Handle Avatar Upload
         if ($request->hasFile('avatar')) {
              \Illuminate\Support\Facades\Log::info('Avatar upload detected.');
              if ($request->file('avatar')->isValid()) {

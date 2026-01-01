@@ -15,17 +15,14 @@ class InterviewScheduled extends Notification
 
     public $interview;
 
-    /**
-     * Create a new notification instance.
-     */
+
     public function __construct(Interview $interview)
     {
         $this->interview = $interview;
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
+
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -33,9 +30,6 @@ class InterviewScheduled extends Notification
         return ['database', 'mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
@@ -44,12 +38,11 @@ class InterviewScheduled extends Notification
                     ->line('Job: ' . $this->interview->jobApplication->job->title)
                     ->line('Type: ' . ucfirst($this->interview->type))
                     ->line('Time: ' . $this->interview->scheduled_at->format('M d, Y h:i A'))
-                    ->action('View Details', route('candidate.applications')) // Redirect to applications dash for now
+                    ->action('View Details', route('candidate.applications')) 
                     ->line('Please prepare accordingly. Good luck!');
     }
 
     /**
-     * Get the array representation of the notification.
      *
      * @return array<string, mixed>
      */

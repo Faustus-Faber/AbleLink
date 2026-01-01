@@ -16,7 +16,7 @@
             left: 0px;
             bottom: 0px;
             right: 0px;
-            border: 10px solid #1e293b; /* Slate-800 */
+            border: 10px solid #1e293b; 
             border-radius: 10px;
         }
         .inner-border {
@@ -25,7 +25,7 @@
             left: 15px;
             bottom: 15px;
             right: 15px;
-            border: 2px solid #cbd5e1; /* Slate-300 */
+            border: 2px solid #cbd5e1; 
             border-radius: 5px;
         }
         .container {
@@ -34,7 +34,7 @@
         .logo {
             font-size: 24px;
             font-weight: bold;
-            color: #4f46e5; /* Indigo-600 */
+            color: #4f46e5; 
             margin-bottom: 20px;
         }
         .header {

@@ -26,7 +26,7 @@ class MissedMedicationNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // Keeping it simple for local testing, can add 'mail' later
+        return ['database'];
     }
 
     public function toDatabase($notifiable)

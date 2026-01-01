@@ -3,7 +3,6 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 font-sans">
 
-    {{-- Header --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-12 pb-8">
         <h1 class="text-3xl font-black text-slate-900 tracking-tight">
             Interview Management
@@ -13,7 +12,6 @@
         </p>
     </div>
 
-    {{-- Main Content --}}
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pb-20">
         @if (session('success'))
             <div class="mb-8 bg-emerald-50 border border-emerald-200 text-emerald-800 px-6 py-4 rounded-2xl text-sm font-bold shadow-sm">

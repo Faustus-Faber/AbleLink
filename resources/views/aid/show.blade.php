@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-<!-- F20 - Akida Lisi -->
-
 @section('content')
 <div class="max-w-4xl mx-auto">
     <div class="mb-6">

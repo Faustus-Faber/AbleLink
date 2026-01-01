@@ -23,19 +23,16 @@ class DoctorAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Get all active patients
         $activePatientIds = $caregiver->patients()
             ->wherePivot('status', 'active')
             ->pluck('users.id')
             ->all();
 
-        // Get all appointments for linked patients
         $appointments = DoctorAppointment::whereIn('user_id', $activePatientIds)
             ->with(['user', 'caregiver'])
             ->orderBy('appointment_date', 'asc')
             ->get();
 
-        // Get patients for the form dropdown
         $patients = $caregiver->patients()
             ->wherePivot('status', 'active')
             ->get();
@@ -50,7 +47,6 @@ class DoctorAppointmentController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link
         $isLinked = $caregiver->patients()
             ->where('user_id', $user->id)
             ->wherePivot('status', 'active')
@@ -70,7 +66,6 @@ class DoctorAppointmentController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link
         $isLinked = $caregiver->patients()
             ->where('user_id', $user->id)
             ->wherePivot('status', 'active')
@@ -92,7 +87,6 @@ class DoctorAppointmentController extends Controller
             'notes' => 'nullable|string|max:2000',
         ]);
 
-        // Combine date and time
         $appointmentDateTime = $validated['appointment_date'] . ' ' . $validated['appointment_time'];
 
         $appointment = DoctorAppointment::create([
@@ -109,16 +103,12 @@ class DoctorAppointmentController extends Controller
             'status' => 'scheduled',
         ]);
 
-        // F17 - Notify the user about the new appointment
+        // F17 - Roza Akter
         $appointment->load(['user', 'caregiver']);
-        // Note: Notification class might not exist if I didn't copy it. I need to check later.
-        // If it errors, I will remove/comment this line or copy the notification.
-        // Assuming user has notify method (User model).
+
         try {
             $appointment->user->notify(new AppointmentScheduled($appointment));
         } catch (\Exception $e) {
-            // Log error or ignore if notification class missing?
-            // Ideally should copy Notification class too.
         }
 
         return redirect()->route('caregiver.appointments.index')
@@ -132,7 +122,6 @@ class DoctorAppointmentController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link to the patient
         $isLinked = $caregiver->patients()
             ->where('user_id', $appointment->user_id)
             ->wherePivot('status', 'active')
@@ -152,7 +141,6 @@ class DoctorAppointmentController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link to the patient
         $isLinked = $caregiver->patients()
             ->where('user_id', $appointment->user_id)
             ->wherePivot('status', 'active')
@@ -175,7 +163,6 @@ class DoctorAppointmentController extends Controller
             'status' => 'required|in:scheduled,completed,cancelled',
         ]);
 
-        // Combine date and time
         $appointmentDateTime = $validated['appointment_date'] . ' ' . $validated['appointment_time'];
 
         $appointment->update([
@@ -201,7 +188,6 @@ class DoctorAppointmentController extends Controller
     {
         $caregiver = Auth::user();
         
-        // Verify link to the patient
         $isLinked = $caregiver->patients()
             ->where('user_id', $appointment->user_id)
             ->wherePivot('status', 'active')

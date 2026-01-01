@@ -49,7 +49,6 @@ class EmergencySosController extends Controller
             ->first();
 
         if ($existingEvent) {
-             // Update location if provided
             $existingEvent->update([
                 'latitude' => $validated['latitude'] ?? $existingEvent->latitude,
                 'longitude' => $validated['longitude'] ?? $existingEvent->longitude,
@@ -57,14 +56,14 @@ class EmergencySosController extends Controller
                 'notes' => ($validated['notes'] && $validated['notes'] !== $existingEvent->notes) 
                     ? $existingEvent->notes . "\n[Update]: " . $validated['notes'] 
                     : $existingEvent->notes,
-                'updated_at' => now(), // Bump it in lists
+                'updated_at' => now(), 
             ]);
 
             return redirect()
                 ->route('profile.show')
                 ->with([
                     'success' => 'SOS alert updated. Help is already on the way.',
-                    'sos_success' => true // F15 - Trigger success modal
+                    'sos_success' => true 
                 ]);
         }
 
@@ -77,7 +76,6 @@ class EmergencySosController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Notify admins + active linked caregivers (mail default is "log" if not configured).
         try {
             $event->loadMissing(['user.profile']);
 
@@ -113,7 +111,7 @@ class EmergencySosController extends Controller
             ->route('profile.show')
             ->with([
                 'success' => 'SOS alert sent. Help has been notified.',
-                'sos_success' => true // F15 - Trigger success modal
+                'sos_success' => true 
             ]);
     }
 

@@ -16,7 +16,6 @@ class HealthDashboardController extends Controller
     {
         $user = Auth::user();
         
-        // Ensure profile exists
         if (!$user->profile) {
             $user->profile()->create([]);
         }
@@ -28,7 +27,6 @@ class HealthDashboardController extends Controller
         $goals = HealthGoal::where('user_id', $user->id)->where('status', 'active')->get();
         $recentMetrics = HealthMetric::where('user_id', $user->id)->latest()->take(5)->get();
 
-        // Calculate Missed Medications (Simple Logic for Demo)
         $missedMedications = collect();
         $now = now();
         
@@ -38,7 +36,6 @@ class HealthDashboardController extends Controller
                 $todayScheduled = now()->setTimeFrom($scheduledTime);
                 
                 if ($now->greaterThan($todayScheduled)) {
-                    // Check if logged today
                     if ($med->logs->isEmpty()) {
                         $missedMedications->push($med);
                     }

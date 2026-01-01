@@ -15,7 +15,7 @@ class MatrimonyController extends Controller
         $query = MatrimonyProfile::with('user')
             ->where(function($q) {
                 $q->where('privacy_level', 'public')
-                  ->orWhere('user_id', Auth::id()); // Always show own profile
+                  ->orWhere('user_id', Auth::id()); 
             });
 
         if ($request->has('search')) {
@@ -43,7 +43,6 @@ class MatrimonyController extends Controller
 
         $profiles = $query->paginate(12);
         
-        // Explicitly fetch current user's profile for the view logic
         $myProfile = MatrimonyProfile::where('user_id', Auth::id())->first();
 
         return view('community.matrimony.index', compact('profiles', 'myProfile'));
@@ -83,10 +82,9 @@ class MatrimonyController extends Controller
             $validated['photo_path'] = $path;
         }
 
-        // Explicit creation to ensure user_id is set
         $profile = new MatrimonyProfile($validated);
         $profile->user_id = Auth::id();
-        $profile->privacy_level = 'public'; // Enforce public privacy
+        $profile->privacy_level = 'public'; 
         $profile->save();
 
         return redirect()->route('community.matrimony.index')->with('success', 'Profile created successfully.');
@@ -105,7 +103,6 @@ class MatrimonyController extends Controller
     {
         $profile = MatrimonyProfile::where('user_id', Auth::id())->first();
         
-        // Ensure we are updating the existing profile
         if (!$profile) {
             return redirect()->route('community.matrimony.create');
         }
@@ -122,7 +119,7 @@ class MatrimonyController extends Controller
             'hobbies' => 'nullable|array',
         ]);
 
-        $validated['privacy_level'] = 'public'; // Enforce public privacy
+        $validated['privacy_level'] = 'public'; 
 
         $profile->update($validated);
 
@@ -131,7 +128,6 @@ class MatrimonyController extends Controller
 
     public function show(MatrimonyProfile $matrimony)
     {
-        // Add privacy checks here if needed
         $matrimony->load('user');
         return view('community.matrimony.show', ['profile' => $matrimony]);
     }

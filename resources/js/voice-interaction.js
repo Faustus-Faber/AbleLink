@@ -7,7 +7,6 @@ export class VoiceInteraction {
         this.currentUtterance = null;
         this.hoveredElement = null;
 
-        // Bind methods
         this.handleMouseOver = this.handleMouseOver.bind(this);
         this.handleMouseOut = this.handleMouseOut.bind(this);
 
@@ -21,14 +20,12 @@ export class VoiceInteraction {
         container.id = 'voice-widget';
         container.className = 'fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2';
 
-        // Create simple toggle button
         const toggleBtn = document.createElement('button');
         toggleBtn.id = 'voice-toggle-btn';
         toggleBtn.className = 'w-16 h-16 bg-slate-800 hover:bg-slate-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-105 focus:outline-none border-4 border-transparent';
         toggleBtn.setAttribute('aria-label', 'Toggle Hover Reader');
         toggleBtn.title = "Enable Hover Reader";
 
-        // Speaker Icon
         toggleBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
@@ -40,7 +37,6 @@ export class VoiceInteraction {
         container.appendChild(toggleBtn);
         document.body.appendChild(container);
 
-        // Add styles for highlighting
         const style = document.createElement('style');
         style.textContent = `
             .voice-reading-highlight {
@@ -57,7 +53,6 @@ export class VoiceInteraction {
         const btn = document.getElementById('voice-toggle-btn');
 
         if (this.isHoverMode) {
-            // Enable
             btn.classList.remove('bg-slate-800', 'hover:bg-slate-700');
             btn.classList.add('bg-blue-600', 'hover:bg-blue-500', 'border-blue-300');
             btn.title = "Disable Hover Reader";
@@ -66,7 +61,6 @@ export class VoiceInteraction {
             document.body.addEventListener('mouseover', this.handleMouseOver);
             document.body.addEventListener('mouseout', this.handleMouseOut);
         } else {
-            // Disable
             btn.classList.add('bg-slate-800', 'hover:bg-slate-700');
             btn.classList.remove('bg-blue-600', 'hover:bg-blue-500', 'border-blue-300');
             btn.title = "Enable Hover Reader";
@@ -79,27 +73,31 @@ export class VoiceInteraction {
         }
     }
 
+    suspend() {
+        this.isSuspended = true;
+        this.stopSpeaking();
+        this.removeHighlight();
+    }
+
+    resume() {
+        this.isSuspended = false;
+    }
+
     handleMouseOver(event) {
-        if (!this.isHoverMode) return;
+        if (!this.isHoverMode || this.isSuspended) return;
 
         const target = event.target;
 
-        // Ignore the widget itself
         if (target.closest('#voice-widget')) return;
 
-        // Get meaningful text
         let text = "";
 
-        // Handle inputs/textareas specifically
         if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
             text = target.value || target.placeholder || "";
             if (target.labels && target.labels.length > 0) {
                 text = target.labels[0].innerText + ". " + text;
             }
         } else {
-            // For regular elements, check if they have direct text content
-            // We want to avoid reading the parent container's text which includes all children
-            // So we check if the element has non-empty text nodes or is a specific text tag
             const validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'SPAN', 'A', 'BUTTON', 'LI', 'LABEL', 'TD', 'TH', 'STRONG', 'EM', 'B', 'I'];
 
             if (validTags.includes(target.tagName) || (target.innerText && target.children.length === 0)) {
@@ -110,14 +108,12 @@ export class VoiceInteraction {
         text = text.trim();
 
         if (text && text.length > 0) {
-            // Don't repeat if hovering same element
             if (this.hoveredElement === target) return;
 
             this.removeHighlight();
             this.hoveredElement = target;
             this.hoveredElement.classList.add('voice-reading-highlight');
 
-            // Debounce slightly to avoid reading everything while scrolling fast
             if (this.debounceTimer) clearTimeout(this.debounceTimer);
             this.debounceTimer = setTimeout(() => {
                 this.speak(text);
@@ -126,8 +122,6 @@ export class VoiceInteraction {
     }
 
     handleMouseOut(event) {
-        // Only clear highlight, don't necessarily stop speaking immediately unless we want to cut off
-        // Usually better to let it finish or stop on next hover
         if (event.target === this.hoveredElement) {
             this.removeHighlight();
             this.hoveredElement = null;
@@ -141,11 +135,12 @@ export class VoiceInteraction {
     }
 
     speak(text) {
+        if (this.isSuspended) return;
+
         if (this.synthesis.speaking) {
             this.synthesis.cancel();
         }
 
-        // Limit text length for sanity
         if (text.length > 300) {
             text = text.substring(0, 300) + "...";
         }
@@ -159,9 +154,7 @@ export class VoiceInteraction {
     }
 }
 
-// Auto-initialize - Only for disabled users
 window.addEventListener('DOMContentLoaded', () => {
-    // Check if user is disabled (set in app.blade.php)
     if (window.ableLinkIsDisabled && !window.VoiceAssistant) {
         window.VoiceAssistant = new VoiceInteraction();
     } else if (!window.ableLinkIsDisabled) {

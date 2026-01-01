@@ -1,10 +1,9 @@
-<!-- //F13 - Farhan Zarif -->
+
 @extends('layouts.app')
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     
-    <!-- Hero Section with Search -->
     <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
         <div class="max-w-xl">
             <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">Community Forum</h1>
@@ -12,7 +11,6 @@
         </div>
         
         <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <!-- Search Form -->
             <form action="{{ route('forum.index') }}" method="GET" class="relative group w-full sm:w-80">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -45,11 +43,9 @@
         </div>
     @endif
 
-    <!-- Forum List -->
     <div class="space-y-4">
         @forelse($threads as $thread)
             <div class="group bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 relative overflow-hidden">
-                <!-- Hover Accent (Left Border) -->
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
@@ -72,9 +68,7 @@
                         <p class="text-slate-600 line-clamp-2 text-base leading-relaxed">{{ Str::limit($thread->body, 180) }}</p>
                     </div>
 
-                    <!-- Meta / Stats -->
                     <div class="flex sm:flex-col items-center sm:items-end gap-4 sm:gap-1 flex-shrink-0">
-                        <!-- User -->
                         <div class="flex items-center space-x-2 z-10">
                             <span class="text-sm font-semibold text-slate-700">{{ $thread->user->name }}</span>
                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 border border-slate-200">
@@ -82,7 +76,6 @@
                             </div>
                         </div>
 
-                        <!-- Replies Counter -->
                         <div class="flex items-center space-x-1.5 text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 mt-2">
                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                              <span class="text-xs font-bold">{{ $thread->replies_count }}</span>

@@ -1,6 +1,6 @@
 <?php
-// F10 - Rifat Jahan Roza
-//F10 - Rifat Jahan Roza
+// F10 - Roza Akter
+
 
 namespace App\Models\Employment;
 
@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
 
 
-//F10 - Employer Job Posting & Dashboard
 class Job extends Model
 {
     use HasFactory;
@@ -46,6 +45,7 @@ class Job extends Model
         'screen_reader_compatible' => 'boolean',
         'flexible_hours' => 'boolean',
         'remote_work_available' => 'boolean',
+        'salary_min' => 'decimal:2',
         'salary_max' => 'decimal:2',
         // F12 - Farhan Zarif
         'skills_required' => 'array',
@@ -56,10 +56,10 @@ class Job extends Model
     {
         return $this->belongsTo(User::class, 'employer_id');
     }
-    // F9 - Evan Munshi
+
     public function applications()
     {
-        return $this->hasMany(JobApplication::class);
+        return $this->hasMany(JobApplication::class, 'job_id');
     }
 
     public function pendingApplications()
@@ -71,6 +71,7 @@ class Job extends Model
     {
         return $this->hasMany(JobApplication::class, 'job_id')->where('status', 'shortlisted');
     }
+
     public function isActive()
     {
         return $this->status === 'active';

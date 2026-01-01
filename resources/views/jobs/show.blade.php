@@ -57,7 +57,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Job Details -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 lg:p-10 mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 mb-8 pb-4 border-b border-zinc-100">Job Details</h2>
@@ -131,7 +130,6 @@
                     </div>
                 </div>
 
-                <!-- Sidebar -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 sticky top-24">
                         <h2 class="text-lg font-bold text-blue-900 mb-6 pb-4 border-b border-zinc-100">About the Company</h2>
@@ -182,7 +180,6 @@
 
             @auth
                 @if(!$hasApplied && !Auth::user()->hasRole('employer'))
-                <!-- Application Modal -->
                 <div x-show="showApplyModal" 
                      style="display: none;"
                      class="fixed inset-0 z-50 overflow-y-auto" 
@@ -190,7 +187,6 @@
                      role="dialog" 
                      aria-modal="true">
                     
-                    <!-- Backdrop -->
                     <div x-show="showApplyModal"
                          x-transition:enter="ease-out duration-300"
                          x-transition:enter-start="opacity-0"
@@ -201,7 +197,6 @@
                          class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
                          @click="showApplyModal = false"></div>
 
-                    <!-- Modal Panel -->
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                         <div x-show="showApplyModal"
                              x-transition:enter="ease-out duration-300"

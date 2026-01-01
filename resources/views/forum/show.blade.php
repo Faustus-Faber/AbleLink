@@ -1,10 +1,8 @@
-<!-- //F13 - Farhan Zarif -->
 @extends('layouts.app')
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <!-- Breadcrumb / Back Link -->
     <nav class="mb-8">
         <a href="{{ route('forum.index') }}" class="inline-flex items-center px-5 py-2.5 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 hover:shadow-md transition-all">
             <svg class="w-5 h-5 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -12,10 +10,8 @@
         </a>
     </nav>
 
-    <!-- Main Thread Card -->
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-10">
         <div class="p-8 sm:p-10">
-            <!-- Header -->
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-3">
                     <span class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider border border-slate-200">
@@ -25,7 +21,6 @@
                     <span class="text-sm font-medium text-slate-500">{{ $thread->created_at->format('F j, Y') }}</span>
                 </div>
                 
-                <!-- ID/Actions could go here -->
                 @auth
                     @if(Auth::id() === $thread->user_id)
                         <form action="{{ route('forum.destroy', $thread->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this thread?');">
@@ -42,7 +37,6 @@
             
             <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">{{ $thread->title }}</h1>
             
-            <!-- Author Info (Top) -->
             <div class="flex items-center mb-8 pb-8 border-b border-slate-100">
                 <div class="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg shadow-md ring-4 ring-slate-50">
                     {{ substr($thread->user->name, 0, 1) }}
@@ -74,7 +68,6 @@
         </div>
     </div>
 
-    <!-- Replies Section -->
     <div class="mb-10">
         <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center">
             Replies 
@@ -90,7 +83,6 @@
                         </div>
                     </div>
                     <div class="flex-grow bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm relative group">
-                        <!-- Reply Header -->
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs border border-slate-200 sm:hidden mr-3">
@@ -122,7 +114,6 @@
                                 </form>
                             </div>
                         @else
-                             <!-- Placeholder for spacing if needed -->
                              <div class="h-2"></div>
                         @endif
                     </div>
@@ -135,7 +126,6 @@
         </div>
     </div>
 
-    <!-- Reply Form -->
     <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
         <h3 class="text-lg font-bold text-slate-900 mb-6">Leave a Reply</h3>
         <form action="{{ route('forum.reply', $thread->id) }}" method="POST">

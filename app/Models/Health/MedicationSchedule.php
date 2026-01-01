@@ -16,8 +16,8 @@ class MedicationSchedule extends Model
         'user_id',
         'medication_name',
         'dosage',
-        'frequency', // daily, weekly, as_needed
-        'scheduled_time', // Time of day (H:i)
+        'frequency', 
+        'scheduled_time', 
         'instructions',
         'is_active',
     ];

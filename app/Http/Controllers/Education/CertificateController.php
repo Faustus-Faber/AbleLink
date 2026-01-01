@@ -12,52 +12,60 @@ use Illuminate\Support\Str;
 
 class CertificateController extends Controller
 {
-    protected $aiService;
+    protected AiService $aiService;
 
     public function __construct(AiService $aiService)
     {
         $this->aiService = $aiService;
     }
 
-    public function generate(Request $request, Course $course)
+    public function generate(Request $request, Course $course): \Symfony\Component\HttpFoundation\Response
     {
         $user = auth()->user();
+        
+        if ($user === null) {
+            abort(401, 'User not authenticated');
+        }
 
-        // 1. Verification Logic (Simplify for this feature: Assume if they can click the button, they finished it)
-        // In a real scenario, we'd check $user->hasCompleted($course)
+        $certQuery = Certificate::where('user_id', $user->id);
+        $certQuery->where('course_id', $course->id);
+        $existingCert = $certQuery->first();
 
-        // 2. Check existing certificate
-        $existingCert = Certificate::where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        if ($existingCert) {
+        if ($existingCert !== null) {
             return $this->downloadPdf($existingCert);
         }
 
-        // 3. AI Message Generation
         $aiMessage = $this->aiService->generateCertificateMessage($user, $course);
 
-        // 4. Create Record
-        $certificate = Certificate::create([
+        $certificateParams = [
             'user_id' => $user->id,
             'course_id' => $course->id,
             'certificate_code' => 'CERT-' . date('Y') . '-' . strtoupper(Str::random(8)),
             'ai_generated_message' => $aiMessage,
             'issued_at' => now(),
-        ]);
+        ];
+        
+        $certificate = Certificate::create($certificateParams);
 
         return $this->downloadPdf($certificate);
     }
 
-    private function downloadPdf(Certificate $certificate)
+    private function downloadPdf(Certificate $certificate): \Symfony\Component\HttpFoundation\Response
     {
+        $userData = $certificate->user;
+        $courseData = $certificate->course;
+        
+        $formattedDate = '';
+        if ($certificate->issued_at !== null) {
+            $formattedDate = $certificate->issued_at->format('F d, Y');
+        }
+        
         $data = [
             'certificate' => $certificate,
-            'user' => $certificate->user,
-            'course' => $certificate->course,
+            'user' => $userData,
+            'course' => $courseData,
             'title' => 'Certificate of Completion',
-            'date' => $certificate->issued_at->format('F d, Y'),
+            'date' => $formattedDate,
         ];
 
         $pdf = Pdf::loadView('education.certificate', $data);

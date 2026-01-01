@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto py-8 px-4" x-data="{ showMedModal: false, showGoalModal: false }">
-    <!-- Breadcrumb / Back -->
     <a href="{{ route('caregiver.dashboard') }}" class="group inline-flex items-center text-slate-500 hover:text-teal-600 mb-8 font-medium transition-colors">
         <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center mr-3 group-hover:border-teal-200 group-hover:bg-teal-50 shadow-sm transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -10,10 +9,8 @@
         Back to Dashboard
     </a>
 
-    <!-- Main Card -->
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mb-8">
         
-        <!-- Header (Solid Color, No Gradient) -->
         <div class="bg-teal-900 px-8 py-8 relative overflow-hidden">
             <div class="absolute top-0 right-0 p-4 opacity-10">
                 <svg class="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
@@ -25,10 +22,8 @@
                     <span>Update diagnosis, medications, and health goals</span>
                 </div>
             </div>
-        </div>
 
-        <div class="p-8 md:p-10">
-            <!-- Diagnosis Section -->
+            <div class="p-8 md:p-10">
             <section class="mb-12">
                 <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
                     <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
@@ -61,7 +56,6 @@
             </section>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Medications Section -->
                 <section>
                     <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -106,7 +100,6 @@
                     @endif
                 </section>
 
-                <!-- Health Goals Section -->
                 <section>
                     <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -154,7 +147,6 @@
         </div>
     </div>
 
-    <!-- Add Medication Modal (Premium) -->
     <div x-show="showMedModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showMedModal" x-transition.opacity class="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity" @click="showMedModal = false" aria-hidden="true"></div>
@@ -267,7 +259,6 @@
         </div>
     </div>
 
-    <!-- Add Goal Modal (Premium) -->
     <div x-show="showGoalModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showGoalModal" x-transition.opacity class="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity" @click="showGoalModal = false" aria-hidden="true"></div>
